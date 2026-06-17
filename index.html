@@ -115,10 +115,9 @@
 
         if (!genreInput) { alert('장르를 입력해 주세요!'); return; }
         if (API_KEY === ' ') {
-            alert('유튜브 API_KEY를 소스 코드 내에 입력하셔야 실시간 조회가 가능합니다.');
-            return;
-        }
-
+    alert('유튜브 API_KEY를 소스 코드 내에 입력하셔야 실시간 조회가 가능합니다.');
+    return;
+}
         videoGrid.innerHTML = '<div class="status-message">조건에 맞는 최적의 안무 영상을 탐색 중입니다...</div>';
         
         // 🔥 핵심 수정 1: 검색 조건 세분화 (k-pop, choreo, 일반 장르)
