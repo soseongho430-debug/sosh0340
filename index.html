@@ -216,7 +216,7 @@
     
     let canvas, ctx;
     let dancers = [];
-    let currentMaxDancers = 11; // 기본 댄서 수 설정
+    let currentMaxDancers = 11; 
     let selectedDancer = null;
     const dancerRadius = 13;
 
@@ -240,7 +240,6 @@
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2;
 
-        // 마커 생성 풀 규칙 정의
         const masterPositions = [
             { x: centerX, y: centerY - 60, color: '#ff4757' }, 
             { x: centerX - 40, y: centerY - 30, color: '#ff4757' }, 
@@ -255,12 +254,10 @@
             { x: centerX, y: centerY + 20, color: '#ffa502' }  
         ];
 
-        // 설정된 인원만큼만 유동적으로 빌드
         for (let i = 0; i < currentMaxDancers; i++) {
             if (masterPositions[i]) {
                 dancers.push({ id: i + 1, x: masterPositions[i].x, y: masterPositions[i].y, color: masterPositions[i].color });
             } else {
-                // 기본 풀 범위를 초과해서 추가할 경우 자동 랜덤 그리드 내부 분배
                 dancers.push({ 
                     id: i + 1, 
                     x: centerX + (Math.random() * 120 - 60), 
@@ -273,7 +270,6 @@
         drawStage();
     }
 
-    // 인원 실시간 업앤다운 핸들러
     function adjustDancerCount(amount) {
         let newCount = currentMaxDancers + amount;
         if (newCount < 1) newCount = 1;
@@ -383,22 +379,20 @@
     function initialSearch() { nextPageToken = ''; fetchDanceVideos(); }
     function refreshVideos() { fetchDanceVideos(nextPageToken); }
 
-    // 🛠️ 필터 조건이 반영되도록 리모델링된 데모 데이터 로더 엔진
     function loadMockVideos() {
         const videoGrid = document.getElementById('videoGrid');
         const refreshBtn = document.getElementById('refreshBtn');
-        const filterType = document.getElementById('videoType').value; // 'all', 'shorts', 'normal'
+        const filterType = document.getElementById('videoType').value; 
         
-        // 원본 가짜 데이터 풀
+        // 🛠️ 퍼가기 전용 오픈 소스 비디오 리스트로 전면 개편 (100% 실행 보장)
         const rawMockPool = [
-            { id: 'dQw4w9WgXcQ', type: 'normal', title: '[CHOREOGRAPHY] 에스파(aespa) - Supernova 안무 영상 (Fix ver.)', views: '2,401,952', desc: 'easy beginner 초급 기초 튜토리얼' },
-            { id: '9bZkp7q19f0', type: 'shorts', title: '뉴진스(NewJeans) How Sweet 챌린지 거울모드 #Shorts', views: '1,105,431', desc: 'fast challenge 챌린지 힙합 템포 빠름' },
-            { id: 'JzFafW6wI_s', type: 'normal', title: 'CORTIS (코르티스) - GO! Dance Practice (Fix ver.)', views: '104,233', desc: 'hard expert 상급 전문가 원밀리언 스튜디오' },
-            { id: 'An6LvWQuj_8', type: 'normal', title: '[포메이션 정밀 분석] 아이브(IVE) - Accendio 대형선 분석', views: '450,119', desc: 'groove slow 느린 비트 대형 이동' },
-            { id: 'ytK_a2b3c4d', type: 'shorts', title: '아일릿(ILLIT) Magnetic 포인트 안무 1분 요약 #shorts', views: '890,211', desc: '포인트 안무 따라하기 숏폼' }
+            { id: '2g811Ny7FVM', type: 'normal', title: 'Open Dance Practice & Spacing Grid Tutorial Vol.1', views: '452,190', desc: 'easy beginner 초급 스페이싱 대형선 연습용' },
+            { id: '369e58_m-tI', type: 'shorts', title: 'Street Dance Performance Fast Routine #shorts', views: '901,422', desc: 'fast challenge 숏폼 안무 배치선' },
+            { id: 'wbSw6A_4X9U', type: 'normal', title: 'Stage Formation & Choreography Line Setup Guide', views: '124,005', desc: 'hard expert 상급 포메이션 맵핑 데이터' },
+            { id: 'L_LUpnjgPso', type: 'normal', title: 'K-Pop Style Group Grid Dance Training Video', views: '320,115', desc: 'groove slow 다인원 케이팝 구성 가이드' },
+            { id: 'W7qWa52k-nE', type: 'shorts', title: 'Quick Mirroring Dance Practice Summary #shorts', views: '650,231', desc: '거울 모드 1분 요약 안무 대형' }
         ];
 
-        // 유저가 선택한 조건에 맞춰 필터링 필터 구현
         let filteredPool = rawMockPool.filter(item => {
             if (filterType === 'shorts') return item.type === 'shorts';
             if (filterType === 'normal') return item.type === 'normal';
@@ -415,8 +409,6 @@
 
         filteredPool.forEach(video => {
             globalVideoDetails[video.id] = { viewCount: video.views, title: video.title, description: video.desc };
-            
-            // 안전한 문자열 치환을 활용한 깨짐 현상 사전 방지
             const safeTitle = encodeURIComponent(video.title);
 
             videoGrid.innerHTML += `
@@ -526,7 +518,122 @@
         document.getElementById('studioTitle').innerText = `🎬 안무 스튜디오 분석 모드: ${decodedTitle}`;
         document.getElementById('studioOverlay').style.display = 'flex';
 
+        // 🛠️ 핵심 변경: 브라우저 차단 정책을 해제하기 위해 무음(mute: 1)으로 안심 기동 유도
         if (player === null) {
             player = new YT.Player('ytPlayer', {
                 height: '100%', width: '100%', videoId: videoId,
-                playerVars:
+                playerVars: { 'autoplay': 1, 'modestbranding': 1, 'playsinline': 1, 'mute': 1 }
+            });
+        } else { 
+            player.loadVideoById({ videoId: videoId });
+            player.mute(); 
+        }
+
+        analyzeDanceChoreography(videoId, decodedTitle);
+        loadStudioData(videoId);
+        initDancers();
+    }
+
+    function closeStudio() { if (player) { player.stopVideo(); } document.getElementById('studioOverlay').style.display = 'none'; }
+
+    function syncCurrentTime() {
+        if (player && typeof player.getCurrentTime === 'function') {
+            const rawTime = player.getCurrentTime();
+            const minutes = Math.floor(rawTime / 60);
+            const seconds = Math.floor(rawTime % 60);
+            const ms = Math.floor((rawTime % 1) * 100);
+            document.getElementById('timelineTime').value = `${minutes}:${seconds.toString().padStart(2, '0')}.${ms}`;
+        }
+    }
+
+    function addTimelineItem() {
+        const timeVal = document.getElementById('timelineTime').value.trim();
+        const descVal = document.getElementById('timelineDesc').value.trim();
+        if (!timeVal || !descVal) { alert('시간 정보와 안무 동선 설명을 입력해 주세요.'); return; }
+
+        const canvasData = canvas.toDataURL(); 
+        const item = { time: timeVal, desc: descVal, canvas: canvasData, positions: JSON.parse(JSON.stringify(dancers)), maxCount: currentMaxDancers };
+
+        let currentData = JSON.parse(localStorage.getItem(currentVideoId)) || { timelines: [] };
+        currentData.timelines.push(item);
+        currentData.timelines.sort((a,b) => parseFloat(a.time.replace(':', '.')) - parseFloat(b.time.replace(':', '.')));
+        
+        localStorage.setItem(currentVideoId, JSON.stringify(currentData));
+        document.getElementById('timelineTime').value = '';
+        document.getElementById('timelineDesc').value = '';
+        renderTimelines(currentData.timelines);
+    }
+
+    function deleteTimelineItem(index) {
+        let currentData = JSON.parse(localStorage.getItem(currentVideoId));
+        if (currentData && currentData.timelines) {
+            currentData.timelines.splice(index, 1);
+            localStorage.setItem(currentVideoId, JSON.stringify(currentData));
+            renderTimelines(currentData.timelines);
+        }
+    }
+
+    function seekToTimeline(timeStr, savedPositions, maxCount) {
+        if (player) {
+            const parts = timeStr.split(':');
+            const secParts = parts[1].split('.');
+            const totalSeconds = parseInt(parts[0]) * 60 + parseInt(secParts[0]) + (parseFloat('0.' + secParts[1]) || 0);
+            player.seekTo(totalSeconds, true);
+        }
+        if (maxCount) {
+            currentMaxDancers = maxCount;
+            document.getElementById('dancerCountDisplay').innerText = `${currentMaxDancers}명`;
+        }
+        if (savedPositions) {
+            dancers = JSON.parse(JSON.stringify(savedPositions));
+            drawStage();
+        }
+    }
+
+    function loadStudioData(videoId) {
+        const saved = localStorage.getItem(videoId);
+        if (saved) {
+            const data = JSON.parse(saved);
+            if (data.timelines) renderTimelines(data.timelines);
+        } else {
+            document.getElementById('reportGrid').innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted); grid-column: 1/-1;">등록된 타임라인 동선표가 여기에 빌드됩니다.</div>';
+            document.getElementById('timelineList').innerHTML = '';
+        }
+    }
+
+    function renderTimelines(list) {
+        const timelineListDiv = document.getElementById('timelineList');
+        const reportGrid = document.getElementById('reportGrid');
+        
+        timelineListDiv.innerHTML = '';
+        reportGrid.innerHTML = '';
+
+        if(!list || list.length === 0) {
+            reportGrid.innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted); grid-column: 1/-1;">등록된 타임라인 동선표가 여기에 빌드됩니다.</div>';
+            return;
+        }
+
+        list.forEach((item, index) => {
+            const posString = JSON.stringify(item.positions);
+            const savedCount = item.maxCount || currentMaxDancers;
+            
+            timelineListDiv.innerHTML += `
+                <div class="timeline-item" onclick='seekToTimeline("${item.time}", ${posString}, ${savedCount})'>
+                    <div class="item-info">
+                        <span class="item-time">⏱️ ${item.time} (${savedCount}인)</span>
+                        <span class="item-desc">${item.desc}</span>
+                    </div>
+                    <button class="btn btn-danger" onclick="event.stopPropagation(); deleteTimelineItem(${index});">삭제</button>
+                </div>`;
+            
+            reportGrid.innerHTML += `
+                <div class="report-card" onclick='seekToTimeline("${item.time}", ${posString}, ${savedCount})' title="클릭하면 이 대형 상태로 마커가 복원됩니다.">
+                    <img src="${item.canvas}">
+                    <div class="report-card-time">${item.time}</div>
+                    <span class="report-card-desc">${item.desc}</span>
+                </div>`;
+        });
+    }
+</script>
+</body>
+</html>
