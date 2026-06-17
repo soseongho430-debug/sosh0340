@@ -42,7 +42,7 @@
         .video-title { font-size: 0.95rem; font-weight: bold; margin: 0 0 8px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }
         .channel-name { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px; }
         .video-meta { font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between; }
-        .status-message { text-align: center; font-size: 1.1rem; color: var(--text-muted); margin-top: 40px; width: 100%; }
+        .status-message { text-align: center; font-size: 1.1rem; color: var(--text-muted); margin-top: 40px; width: 100%; grid-column: 1 / -1; }
 
         /* 분석 스튜디오 모달 팝업 */
         .studio-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; padding: 10px; }
@@ -104,7 +104,7 @@
 <div class="container">
     <header>
         <h1>Dance & Formation Studio</h1>
-        <p>무대 격자 위 마커들을 드래그하여 안무 동선표 리포트를 디자인하세요.</p>
+        <p>무대 격자 위 마커들을 드래그하여 안무 동선표 리포트를 디자인하세요. (API 키가 없어도 데모 모드로 작동합니다)</p>
     </header>
     <main>
         <div class="search-section">
@@ -161,7 +161,6 @@
                 </div>
             </div>
             <div class="analysis-sidebar">
-                
                 <div>
                     <div class="section-title">🤖 시스템 안무 속도 및 난이도 진단</div>
                     <div class="ai-analysis-box" id="aiAnalysisBox">영상을 분석하는 중입니다...</div>
@@ -187,7 +186,6 @@
                         <input type="text" id="timelineDesc" placeholder="이 파트의 대형 설명 (예: 에이스 센터 삼각대형)">
                         <button class="btn btn-search" onclick="addTimelineItem()">등록</button>
                     </div>
-                    
                     <div class="timeline-list" id="timelineList"></div>
                 </div>
 
@@ -197,13 +195,14 @@
                         <div style="font-size:0.8rem; color:var(--text-muted); grid-column: 1/-1;">등록된 타임라인 동선표가 여기에 빌드됩니다.</div>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
 </div>
 
 <script>
+    // ⚠️ 여기에 실제 유튜브 API 키를 넣으면 실제 유튜브 검색 데이터를 가져옵니다.
+    // 비워둘 경우 아래 내장된 가짜 안무 데이터(Demo Mode)가 작동합니다.
     const API_KEY = 'AIzaSyDjb6EuJcqPFbhwyIShQHDl1cwF32zd69U'; 
 
     let nextPageToken = ''; 
@@ -211,7 +210,6 @@
     let currentVideoId = '';
     let globalVideoDetails = {}; 
     
-    // 📐 격자 및 마커 제어용 변수들
     let canvas, ctx;
     let dancers = [];
     let selectedDancer = null;
@@ -221,7 +219,6 @@
         canvas = document.getElementById('formationCanvas');
         ctx = canvas.getContext('2d');
 
-        // 마우스 및 터치 이벤트 리스너 바인딩 (드래그 제어)
         canvas.addEventListener('mousedown', onMouseDown);
         canvas.addEventListener('mousemove', onMouseMove);
         canvas.addEventListener('mouseup', onMouseUp);
@@ -233,24 +230,23 @@
         initDancers();
     };
 
-    // 1번부터 11번 멤버 초기 배치 (무대 중앙 X를 감싸는 다이아몬드/역삼각 기본 형태)
     function initDancers() {
         dancers = [];
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2;
 
         const defaultPositions = [
-            { x: centerX, y: centerY - 60, color: '#ff4757' }, // 1
-            { x: centerX - 40, y: centerY - 30, color: '#ff4757' }, // 2
-            { x: centerX - 60, y: centerY + 10, color: '#ff4757' }, // 3
-            { x: centerX - 30, y: centerY + 50, color: '#ff4757' }, // 4
-            { x: centerX, y: centerY + 80, color: '#ff4757' }, // 5
-            { x: centerX + 30, y: centerY + 50, color: '#ff4757' }, // 6
-            { x: centerX + 60, y: centerY + 10, color: '#ff4757' }, // 7
-            { x: centerX + 40, y: centerY - 30, color: '#ff4757' }, // 8
-            { x: centerX - 90, y: centerY - 30, color: '#ffa502' }, // 9 (사이드 옐로우 마커)
-            { x: centerX + 90, y: centerY - 30, color: '#ffa502' }, // 10
-            { x: centerX, y: centerY + 20, color: '#ffa502' }  // 11
+            { x: centerX, y: centerY - 60, color: '#ff4757' }, 
+            { x: centerX - 40, y: centerY - 30, color: '#ff4757' }, 
+            { x: centerX - 60, y: centerY + 10, color: '#ff4757' }, 
+            { x: centerX - 30, y: centerY + 50, color: '#ff4757' }, 
+            { x: centerX, y: centerY + 80, color: '#ff4757' }, 
+            { x: centerX + 30, y: centerY + 50, color: '#ff4757' }, 
+            { x: centerX + 60, y: centerY + 10, color: '#ff4757' }, 
+            { x: centerX + 40, y: centerY - 30, color: '#ff4757' }, 
+            { x: centerX - 90, y: centerY - 30, color: '#ffa502' }, 
+            { x: centerX + 90, y: centerY - 30, color: '#ffa502' }, 
+            { x: centerX, y: centerY + 20, color: '#ffa502' }  
         ];
 
         defaultPositions.forEach((pos, i) => {
@@ -259,11 +255,8 @@
         drawStage();
     }
 
-    // 📐 요청하신 스크린샷과 동일한 어두운 테마 격자 무대와 중앙 핑크 X 그리기 엔진
     function drawStage() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // 1. 격자망 배경 그리기 (Grid Line)
         ctx.strokeStyle = '#282828';
         ctx.lineWidth = 1;
         const gridSize = 25;
@@ -275,7 +268,6 @@
             ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
         }
 
-        // 2. 무대 정중앙 핵심 센터 앵커 포인트 (핑크색 'X') 구획
         const cx = canvas.width / 2;
         const cy = canvas.height / 2;
         ctx.strokeStyle = '#ff4757';
@@ -285,19 +277,15 @@
         ctx.moveTo(cx + 7, cy - 7); ctx.lineTo(cx - 7, cy + 7);
         ctx.stroke();
 
-        // 3. 댄서 1~11번 마커 노드 렌더링
         dancers.forEach(dancer => {
             ctx.beginPath();
             ctx.arc(dancer.x, dancer.y, dancerRadius, 0, Math.PI * 2);
             ctx.fillStyle = dancer.color;
             ctx.fill();
-            
-            // 외곽선 살짝 부여
             ctx.strokeStyle = '#121212';
             ctx.lineWidth = 1.5;
             ctx.stroke();
 
-            // 내부 댄서 백넘버 텍스트 마킹
             ctx.fillStyle = '#ffffff';
             ctx.font = 'bold 11px sans-serif';
             ctx.textAlign = 'center';
@@ -306,7 +294,6 @@
         });
     }
 
-    // 드래그 앤 드롭 수학적 충돌 연산식
     function getMousePos(e) {
         const rect = canvas.getBoundingClientRect();
         return {
@@ -317,11 +304,9 @@
 
     function onMouseDown(e) {
         const pos = getMousePos(e);
-        // 역순 탐색으로 가장 위에 겹친 마커 우선 선택
         for (let i = dancers.length - 1; i >= 0; i--) {
             const d = dancers[i];
-            const dist = Math.hypot(d.x - pos.x, d.y - pos.y);
-            if (dist <= dancerRadius + 5) {
+            if (Math.hypot(d.x - pos.x, d.y - pos.y) <= dancerRadius + 5) {
                 selectedDancer = d;
                 canvas.style.cursor = 'grabbing';
                 break;
@@ -336,7 +321,6 @@
             selectedDancer.y = Math.max(dancerRadius, Math.min(canvas.height - dancerRadius, pos.y));
             drawStage();
         } else {
-            // 마우스 올렸을 때 손가락 표시 커서 변경 피드백
             let hover = false;
             for (let d of dancers) {
                 if (Math.hypot(d.x - pos.x, d.y - pos.y) <= dancerRadius) { hover = true; break; }
@@ -346,18 +330,13 @@
     }
 
     function onMouseUp() { selectedDancer = null; canvas.style.cursor = 'default'; }
-
-    // 터치 디바이스 호환성 레이어 추가
     function onTouchStart(e) { if(e.touches.length === 1) { onMouseDown(e.touches[0]); e.preventDefault(); } }
     function onTouchMove(e) { if(e.touches.length === 1) { onMouseMove(e.touches[0]); e.preventDefault(); } }
-
     function resetMarkers() { initDancers(); }
 
-    // 원클릭 자동 프리셋 대형 정렬 서브 모듈
     function spreadFormation(type) {
         const cx = canvas.width / 2;
         const cy = canvas.height / 2;
-        
         if (type === 'line') {
             const startX = cx - 150;
             const step = 300 / 10;
@@ -372,32 +351,64 @@
         drawStage();
     }
 
-    // 유튜브 API 통합 구조부
     function initialSearch() { nextPageToken = ''; fetchDanceVideos(); }
     function refreshVideos() { fetchDanceVideos(nextPageToken); }
 
-    async function fetchDanceVideos(pageToken = '') {
-        const genreInput = document.getElementById('genreInput').value.trim();
-        const videoType = document.getElementById('videoType').value;
-        const timeRange = document.getElementById('timeRange').value;
-        const regionType = document.getElementById('regionType').value;
+    // 🛠️ 핵심 변경: API 키가 없거나 에러 발생 시 작동하는 가짜(Mock) 안무 비디오 셋업 엔진
+    function loadMockVideos() {
         const videoGrid = document.getElementById('videoGrid');
         const refreshBtn = document.getElementById('refreshBtn');
+        
+        const mockData = [
+            { id: 'dQw4w9WgXcQ', title: '[CHOREOGRAPHY] 에스파(aespa) - Supernova 안무 영상 (Fix ver.)', views: '2,401,952', desc: 'easy beginner 초급 기초 튜토리얼' },
+            { id: '9bZkp7q19f0', title: '[MIRROR] 뉴진스(NewJeans) - How Sweet Dance Practice (거울 모드)', views: '1,105,431', desc: 'fast challenge 챌린지 힙합 템포 빠름' },
+            { id: 'JzFafW6wI_s', title: 'CORTIS (코르티스) - GO! Dance Practice (Fix ver.)', views: '104,233', desc: 'hard expert 상급 전문가 원밀리언 스튜디오' },
+            { id: 'An6LvWQuj_8', title: '[포메이션 정밀 분석] 아이브(IVE) - Accendio 대형선 분석', views: '450,119', desc: 'groove slow 느린 비트 대형 이동' }
+        ];
+
+        videoGrid.innerHTML = '';
+        refreshBtn.style.display = 'block';
+
+        mockData.forEach(video => {
+            globalVideoDetails[video.id] = { viewCount: video.views, title: video.title, description: video.desc };
+            
+            videoGrid.innerHTML += `
+                <div class="video-card" onclick="openStudio('${video.id}', '${video.title.replace(/"/g, '&quot;')}')">
+                    <div class="thumbnail-container">
+                        <img src="https://img.youtube.com/vi/${video.id}/mqdefault.jpg">
+                    </div>
+                    <div class="video-info">
+                        <div class="video-title">${video.title}</div>
+                        <div class="video-meta"><span>👁️ ${video.views}회 (데모 모드)</span></div>
+                    </div>
+                </div>`;
+        });
+    }
+
+    async function fetchDanceVideos(pageToken = '') {
+        const genreInput = document.getElementById('genreInput').value.trim();
+        const videoGrid = document.getElementById('videoGrid');
 
         if (!genreInput) { alert('검색어를 입력해 주세요!'); return; }
+        
+        // API 키가 없으면 실제 통신을 건너뛰고 바로 내장 데모 데이터를 로드합니다.
         if (!API_KEY || API_KEY.trim() === '' || API_KEY === 'YOUR_YOUTUBE_API_KEY_HERE') {
-            alert('유튜브 API_KEY를 입력하셔야 연동됩니다.'); return;
+            loadMockVideos();
+            return;
         }
 
         videoGrid.innerHTML = '<div class="status-message">조건에 맞는 영상을 탐색 중입니다...</div>';
         let searchQuery = `${genreInput} choreography`;
-
         let url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(searchQuery)}&type=video&maxResults=24&key=${API_KEY}`;
         if (pageToken) url += `&pageToken=${pageToken}`;
 
         try {
             const response = await fetch(url);
             const data = await response.json();
+            
+            // 만약 키가 유효하지 않아 에러 응답을 받으면 가짜 데이터 모드로 전환
+            if(data.error) { loadMockVideos(); return; }
+
             let videos = data.items;
             nextPageToken = data.nextPageToken || '';
 
@@ -408,21 +419,21 @@
             
             statsData.items.forEach(item => {
                 globalVideoDetails[item.id] = { 
-                    viewCount: parseInt(item.statistics.viewCount || 0), 
+                    viewCount: parseInt(item.statistics.viewCount || 0).toLocaleString(), 
                     title: item.snippet.title,
                     description: item.snippet.description || ''
                 };
             });
 
             videoGrid.innerHTML = '';
-            refreshBtn.style.display = 'block';
+            document.getElementById('refreshBtn').style.display = 'block';
 
             videos.forEach(video => {
                 const videoId = video.id.videoId;
                 const detail = globalVideoDetails[videoId];
                 const title = (detail ? detail.title : video.snippet.title).replace(/"/g, '&quot;');
                 const thumbnail = video.snippet.thumbnails.medium.url;
-                const viewCountString = detail ? detail.viewCount.toLocaleString() : '0';
+                const viewCountString = detail ? detail.viewCount : '0';
 
                 videoGrid.innerHTML += `
                     <div class="video-card" onclick="openStudio('${videoId}', '${title}')">
@@ -434,4 +445,147 @@
                     </div>`;
             });
         } catch (error) {
-            videoGrid.innerHTML = `<div class="status-message
+            // 통신 장애 등 예외 발생 시 안전하게 가짜 데이터 실행
+            loadMockVideos();
+        }
+    }
+
+    function analyzeDanceChoreography(videoId, title) {
+        const detail = globalVideoDetails[videoId];
+        const descriptionText = detail ? detail.description : '';
+        const fullText = (title + " " + descriptionText).toLowerCase();
+        
+        let difficulty = "중급 (Normal)";
+        let speed = "보통 속도 (Moderate)";
+        let commentary = "이 영상은 대중적인 구성의 안무 스타일입니다. 기본 격자 밸런스와 센터 X 포인트 위주의 스페이싱 배치를 추천합니다.";
+
+        if (fullText.includes("easy") || fullText.includes("초급") || fullText.includes("beginner")) {
+            difficulty = "초급 (Easy)";
+            commentary = "안무 동작선이 직관적입니다. 격자 그리드 중앙 축을 크게 벗어나지 않는 간결한 동선 포메이션 배치가 유리합니다.";
+        } else if (fullText.includes("hard") || fullText.includes("expert") || fullText.includes("상급") || fullText.includes("1million")) {
+            difficulty = "상급 ~ 전문가 (Challenging)";
+            commentary = "구간 스위칭 횟수가 대단히 많은 다인원 연출입니다. 백마커와 센터 마커 간의 정밀한 그리드 조율이 필수적입니다.";
+        }
+
+        document.getElementById('aiAnalysisBox').innerHTML = `
+            <div><span class="ai-tag">추정 난이도</span> <b>${difficulty}</b></div>
+            <div style="margin: 4px 0;"><span class="ai-tag">체감 비트감</span> <b>${speed}</b></div>
+            <div style="margin-top:8px; font-size:0.85rem; color:#ddd; border-top:1px dashed #555; padding-top:6px;">💡 <b>스튜디오 가이드:</b> ${commentary}</div>
+        `;
+    }
+
+    function openStudio(videoId, videoTitle) {
+        currentVideoId = videoId;
+        document.getElementById('studioTitle').innerText = `🎬 안무 스튜디오 분석 모드: ${videoTitle}`;
+        document.getElementById('studioOverlay').style.display = 'flex';
+
+        if (player === null) {
+            player = new YT.Player('ytPlayer', {
+                height: '100%', width: '100%', videoId: videoId,
+                playerVars: { 'autoplay': 1, 'modestbranding': 1, 'playsinline': 1 }
+            });
+        } else { player.loadVideoById(videoId); }
+
+        analyzeDanceChoreography(videoId, videoTitle);
+        loadStudioData(videoId);
+        initDancers();
+    }
+
+    function closeStudio() { if (player) { player.stopVideo(); } document.getElementById('studioOverlay').style.display = 'none'; }
+
+    function syncCurrentTime() {
+        if (player && typeof player.getCurrentTime === 'function') {
+            const rawTime = player.getCurrentTime();
+            const minutes = Math.floor(rawTime / 60);
+            const seconds = Math.floor(rawTime % 60);
+            const ms = Math.floor((rawTime % 1) * 100);
+            document.getElementById('timelineTime').value = `${minutes}:${seconds.toString().padStart(2, '0')}.${ms}`;
+        }
+    }
+
+    function addTimelineItem() {
+        const timeVal = document.getElementById('timelineTime').value.trim();
+        const descVal = document.getElementById('timelineDesc').value.trim();
+        if (!timeVal || !descVal) { alert('시간 정보와 안무 동선 설명을 입력해 주세요.'); return; }
+
+        const canvasData = canvas.toDataURL(); 
+        const item = { time: timeVal, desc: descVal, canvas: canvasData, positions: JSON.parse(JSON.stringify(dancers)) };
+
+        let currentData = JSON.parse(localStorage.getItem(currentVideoId)) || { timelines: [] };
+        currentData.timelines.push(item);
+        currentData.timelines.sort((a,b) => parseFloat(a.time.replace(':', '.')) - parseFloat(b.time.replace(':', '.')));
+        
+        localStorage.setItem(currentVideoId, JSON.stringify(currentData));
+        document.getElementById('timelineTime').value = '';
+        document.getElementById('timelineDesc').value = '';
+        renderTimelines(currentData.timelines);
+    }
+
+    function deleteTimelineItem(index) {
+        let currentData = JSON.parse(localStorage.getItem(currentVideoId));
+        if (currentData && currentData.timelines) {
+            currentData.timelines.splice(index, 1);
+            localStorage.setItem(currentVideoId, JSON.stringify(currentData));
+            renderTimelines(currentData.timelines);
+        }
+    }
+
+    function seekToTimeline(timeStr, savedPositions) {
+        if (player) {
+            const parts = timeStr.split(':');
+            const secParts = parts[1].split('.');
+            const totalSeconds = parseInt(parts[0]) * 60 + parseInt(secParts[0]) + (parseFloat('0.' + secParts[1]) || 0);
+            player.seekTo(totalSeconds, true);
+        }
+        if (savedPositions) {
+            dancers = JSON.parse(JSON.stringify(savedPositions));
+            drawStage();
+        }
+    }
+
+    function loadStudioData(videoId) {
+        const saved = localStorage.getItem(videoId);
+        if (saved) {
+            const data = JSON.parse(saved);
+            if (data.timelines) renderTimelines(data.timelines);
+        } else {
+            document.getElementById('reportGrid').innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted); grid-column: 1/-1;">등록된 타임라인 동선표가 여기에 빌드됩니다.</div>';
+            document.getElementById('timelineList').innerHTML = '';
+        }
+    }
+
+    function renderTimelines(list) {
+        const timelineListDiv = document.getElementById('timelineList');
+        const reportGrid = document.getElementById('reportGrid');
+        
+        timelineListDiv.innerHTML = '';
+        reportGrid.innerHTML = '';
+
+        if(!list || list.length === 0) {
+            reportGrid.innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted); grid-column: 1/-1;">등록된 타임라인 동선표가 여기에 빌드됩니다.</div>';
+            return;
+        }
+
+        list.forEach((item, index) => {
+            const posString = JSON.stringify(item.positions);
+            
+            timelineListDiv.innerHTML += `
+                <div class="timeline-item" onclick='seekToTimeline("${item.time}", ${posString})'>
+                    <div class="item-info">
+                        <span class="item-time">⏱️ ${item.time}</span>
+                        <span class="item-desc">${item.desc}</span>
+                    </div>
+                    <button class="btn btn-danger" onclick="event.stopPropagation(); deleteTimelineItem(${index});">삭제</button>
+                </div>`;
+            
+            reportGrid.innerHTML += `
+                <div class="report-card" onclick='seekToTimeline("${item.time}", ${posString})' title="클릭하면 이 대형 상태로 마커가 복원됩니다.">
+                    <img src="${item.canvas}">
+                    <div class="report-card-time">${item.time}</div>
+                    <span class="report-card-desc">${item.desc}</span>
+                </div>`;
+        });
+    }
+</script>
+</body>
+</html>
