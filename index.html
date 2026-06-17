@@ -27,6 +27,7 @@
         .btn-refresh { background-color: #2f3542; color: white; display: none; }
         .btn-action { background-color: #3742fa; color: white; margin-top: 5px; width: 100%; }
         .btn-danger { background-color: #ff4757; color: white; padding: 5px 10px; font-size: 0.8rem; }
+        .btn-success { background-color: #2ed573; color: white; }
         
         .filters { display: flex; flex-wrap: wrap; gap: 15px; padding-top: 15px; border-top: 1px solid var(--border-color); }
         .filter-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 120px; }
@@ -44,7 +45,7 @@
         .video-meta { font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between; }
         .status-message { text-align: center; font-size: 1.1rem; color: var(--text-muted); margin-top: 40px; width: 100%; }
 
-        /* ── 분석 스튜디오 모달 팝업 (모바일 반응형 최적화) ── */
+        /* ── 분석 스튜디오 모달 팝업 ── */
         .studio-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; padding: 10px; box-sizing: border-box; }
         .studio-window { background-color: var(--studio-bg); border-radius: 12px; border: 1px solid var(--border-color); width: 100%; max-width: 1300px; height: 95vh; display: flex; flex-direction: column; overflow: hidden; position: relative; }
         .studio-header { padding: 12px 20px; background-color: #222; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
@@ -62,11 +63,15 @@
         .analysis-sidebar { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background-color: #1e1e1e; }
         .section-title { font-size: 1rem; color: var(--accent-color); font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #444; padding-bottom: 5px; }
         
+        /* 시스템 자동 분석 결과창 스타일 */
+        .ai-analysis-box { background: #2f3542; border-left: 5px solid #2ed573; padding: 12px; border-radius: 6px; font-size: 0.9rem; line-height: 1.5; }
+        .ai-tag { display: inline-block; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 0.75rem; margin-right: 5px; background: #1e1e1e; color: #2ed573; }
+
         .meta-selectors { display: flex; gap: 10px; background: #2a2a2a; padding: 10px; border-radius: 8px; }
         .select-box { flex: 1; display: flex; flex-direction: column; gap: 5px; }
         .select-box select { padding: 8px; background: #121212; color: white; border: 1px solid #444; border-radius: 4px; font-size: 0.85rem; }
 
-        /* 동선 캔버스 그리기 (🔥 touch-action 추가로 화면 밀림 완전 방지) */
+        /* 동선 캔버스 그리기 */
         .canvas-section { display: flex; flex-direction: column; gap: 6px; }
         .canvas-container { position: relative; background: #2d3436; border: 2px dashed #555; border-radius: 8px; width: 100%; max-width: 360px; margin: 0 auto; aspect-ratio: 4/3; }
         canvas { width: 100%; height: 100%; display: block; cursor: crosshair; touch-action: none; }
@@ -75,13 +80,20 @@
         
         .timeline-input-group { display: flex; gap: 6px; margin-top: 2px; }
         .timeline-input-group input { flex: 1; padding: 8px 12px; background: #121212; border: 1px solid #444; color: white; border-radius: 6px; font-size: 0.9rem; min-width: 0; }
-        .timeline-list { display: flex; flex-direction: column; gap: 6px; max-height: 180px; overflow-y: auto; margin-top: 8px; }
+        .timeline-list { display: flex; flex-direction: column; gap: 6px; max-height: 150px; overflow-y: auto; margin-top: 8px; }
         .timeline-item { background: #2a2a2a; padding: 8px 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--accent-color); cursor: pointer; }
         .item-info { display: flex; flex-direction: column; gap: 2px; }
         .item-time { font-weight: bold; color: #ff4757; font-size: 0.85rem; }
         .item-desc { font-size: 0.85rem; color: #fff; }
 
-        /* 📱 모바일 디바이스 세로 정렬 대응 미디어 쿼리 */
+        /* ── 동선표 최종 요약 리포트 영역 ── */
+        .report-section { background-color: #252525; padding: 15px; border-radius: 8px; border: 1px solid #444; margin-top: 10px; }
+        .report-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-top: 10px; }
+        .report-card { background: #1a1a1a; padding: 8px; border-radius: 6px; text-align: center; border: 1px solid #333; }
+        .report-card img { width: 100%; border-radius: 4px; background: #2d3436; aspect-ratio: 4/3; object-fit: contain; }
+        .report-card-time { font-size: 0.8rem; color: var(--accent-color); font-weight: bold; margin-top: 5px; }
+        .report-card-desc { font-size: 0.75rem; color: #ddd; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
         @media (max-width: 768px) {
             .studio-body { flex-direction: column; overflow-y: auto; }
             .player-sidebar { flex: none; width: 100%; }
@@ -95,12 +107,12 @@
 <div class="container">
     <header>
         <h1>Dance & Formation Studio</h1>
-        <p>안무 장르 검색 후 영상을 클릭하여 실시간 안무 난이도 분석 및 구간별 동선표를 설계해 보세요.</p>
+        <p>안무 영상을 클릭하면 시스템이 안무를 자동 분석하며, 구간별 대형 동선표 리포트를 추출할 수 있습니다.</p>
     </header>
     <main>
         <div class="search-section">
             <div class="search-box">
-                <input type="text" id="genreInput" placeholder="춤 장르를 입력하세요 (예: K-pop, HipHop, Choreo)">
+                <input type="text" id="genreInput" placeholder="춤 장르 혹은 곡명을 입력하세요 (예: K-pop, HipHop, NewJeans)">
                 <button class="btn btn-search" onclick="initialSearch()">검색</button>
                 <button class="btn btn-refresh" id="refreshBtn" onclick="refreshVideos()">🔄 다른 영상 보기</button>
             </div>
@@ -134,7 +146,7 @@
             </div>
         </div>
         <div class="video-grid" id="videoGrid">
-            <div class="status-message">장르를 입력하고 검색을 시작해 주세요!</div>
+            <div class="status-message">장르나 아티스트를 입력하고 검색을 시작해 주세요!</div>
         </div>
     </main>
 </div>
@@ -152,30 +164,17 @@
                 </div>
             </div>
             <div class="analysis-sidebar">
+                
                 <div>
-                    <div class="section-title">📊 안무 속도 & 난이도 종합 분석</div>
-                    <div class="meta-selectors">
-                        <div class="select-box">
-                            <label for="danceDifficulty" style="font-size:0.8rem; color:var(--text-muted);">안무 난이도</label>
-                            <select id="danceDifficulty" onchange="saveStudioData()">
-                                <option value="미지정">선택하세요</option>
-                                <option value="초급 (Easy)">초급 (Easy)</option>
-                                <option value="중급 (Normal)">중급 (Normal)</option>
-                                <option value="상급 (Hard)">상급 (Hard)</option>
-                                <option value="전문가 (Challenging)">전문가 (Challenging)</option>
-                            </select>
-                        </div>
-                        <div class="select-box">
-                            <label for="danceSpeed" style="font-size:0.8rem; color:var(--text-muted);">안무 체감 속도</label>
-                            <select id="danceSpeed" onchange="saveStudioData()">
-                                <option value="미지정">선택하세요</option>
-                                <option value="느림 (Slow)">느림 (Slow)</option>
-                                <option value="보통 (Moderate)">보통 (Moderate)</option>
-                                <option value="빠름 (Fast)">빠름 (Fast)</option>
-                                <option value="매우 빠름 (Rush)">매우 빠름 (Rush)</option>
-                            </select>
-                        </div>
+                    <div class="section-title">🤖 시스템 안무 속도 및 난이도 진단</div>
+                    <div class="ai-analysis-box" id="aiAnalysisBox">
+                        영상을 분석하는 중입니다...
                     </div>
+                </div>
+
+                <div style="display:none;">
+                    <select id="danceDifficulty" onchange="saveStudioData()"><option value="미지정"></option></select>
+                    <select id="danceSpeed" onchange="saveStudioData()"><option value="미지정"></option></select>
                 </div>
 
                 <div class="canvas-section">
@@ -184,32 +183,39 @@
                         <canvas id="formationCanvas" width="400" height="300"></canvas>
                     </div>
                     <div class="canvas-tools">
-                        <button onclick="setCanvasColor('#ff4757')" style="background:#ff4757; border-radius: 50%; max-width:30px; height:30px; border:none; cursor:pointer;"></button>
-                        <button onclick="setCanvasColor('#2ed573')" style="background:#2ed573; border-radius: 50%; max-width:30px; height:30px; border:none; cursor:pointer;"></button>
-                        <button onclick="setCanvasColor('#1e90ff')" style="background:#1e90ff; border-radius: 50%; max-width:30px; height:30px; border:none; cursor:pointer;"></button>
-                        <button onclick="setCanvasColor('#ffffff')" style="background:#ffffff; color:#000;">🎨</button>
-                        <button onclick="clearCanvas()" style="background:#747d8c;">초기화</button>
+                        <button onclick="setCanvasColor('#ff4757')" style="background:#ff4757; border-radius:50%; max-width:25px; height:25px; border:none; cursor:pointer;"></button>
+                        <button onclick="setCanvasColor('#2ed573')" style="background:#2ed573; border-radius:50%; max-width:25px; height:25px; border:none; cursor:pointer;"></button>
+                        <button onclick="setCanvasColor('#1e90ff')" style="background:#1e90ff; border-radius:50%; max-width:25px; height:25px; border:none; cursor:pointer;"></button>
+                        <button onclick="setCanvasColor('#ffffff')" style="background:#ffffff; color:#000; padding:2px;">🎨</button>
+                        <button onclick="clearCanvas()" style="background:#747d8c;">지우기</button>
                     </div>
                 </div>
 
                 <div>
-                    <div class="section-title">⏱️ 타임라인별 안무 및 동선 관리</div>
-                    <button class="btn btn-action" onclick="syncCurrentTime()">🕒 현재 시간 싱크 가져오기</button>
+                    <div class="section-title">⏱️ 구간별 동선 맵핑 컨트롤러</div>
+                    <button class="btn btn-action" onclick="syncCurrentTime()">🕒 현재 영상 재생 시간 싱크 가져오기</button>
                     <div class="timeline-input-group" style="margin-top:8px;">
-                        <input type="text" id="timelineTime" placeholder="0:00 (자동 입력)">
-                        <input type="text" id="timelineDesc" placeholder="안무 특징 이나 동선 설명 입력">
-                        <button class="btn btn-search" onclick="addTimelineItem()">추가</button>
+                        <input type="text" id="timelineTime" placeholder="0:00 (자동)">
+                        <input type="text" id="timelineDesc" placeholder="이 파트의 대형 설명 (예: 1열 횡대, V자 대형)">
+                        <button class="btn btn-search" onclick="addTimelineItem()">등록</button>
                     </div>
                     
                     <div class="timeline-list" id="timelineList"></div>
                 </div>
+
+                <div class="report-section">
+                    <div class="section-title" style="color:#2ed573; border-bottom:1px solid #2ed573;">📋 생성된 안무 동선표 요약 리포트</div>
+                    <div class="report-grid" id="reportGrid">
+                        <div style="font-size:0.8rem; color:var(--text-muted); grid-column: 1/-1;">등록된 타임라인 동선표가 여기에 빌드됩니다.</div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // ⚠️ 중요: 구글 YouTube Data API v3 키를 입력해 주세요.
     const API_KEY = 'YOUR_YOUTUBE_API_KEY_HERE'; 
 
     let nextPageToken = ''; 
@@ -223,19 +229,17 @@
 
     window.onload = function() {
         canvas = document.getElementById('formationCanvas');
-        ctx = canvas.getContext('2d'); // 🔥 지저분했던 컨텍스트 오타 완벽 제거
+        ctx = canvas.getContext('2d');
         ctx.strokeStyle = currentColor;
         ctx.lineJoin = 'round';
         ctx.lineCap = 'round';
         ctx.lineWidth = 4;
 
-        // 마우스 리스너
         canvas.addEventListener('mousedown', startDrawing);
         canvas.addEventListener('mousemove', draw);
         canvas.addEventListener('mouseup', stopDrawing);
         canvas.addEventListener('mouseout', stopDrawing);
         
-        // 🔥 모바일 손가락 터치 드로잉 간섭 제어 리스너
         canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
         canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
         canvas.addEventListener('touchend', stopDrawing);
@@ -252,20 +256,19 @@
         const videoGrid = document.getElementById('videoGrid');
         const refreshBtn = document.getElementById('refreshBtn');
 
-        if (!genreInput) { alert('장르를 입력해 주세요!'); return; }
+        if (!genreInput) { alert('검색어를 입력해 주세요!'); return; }
         if (!API_KEY || API_KEY.trim() === '' || API_KEY === 'AIzaSyDjb6EuJcqPFbhwyIShQHDl1cwF32zd69U') {
-            alert('유튜브 API_KEY를 정확히 입력하셔야 실시간 조회가 가능합니다.');
+            alert('유튜브 API_KEY를 소스 코드 내에 정확히 입력하셔야 연동됩니다.');
             return;
         }
 
         videoGrid.innerHTML = '<div class="status-message">조건에 맞는 영상을 탐색 중입니다...</div>';
         
-        let searchQuery = '';
+        let searchQuery = `${genreInput} choreography`;
         const lowerInput = genreInput.toLowerCase();
         if (lowerInput === 'k-pop' || lowerInput === 'kpop') searchQuery = 'k-pop 안무영상';
-        else if (lowerInput === 'choreo') searchQuery = 'choreography';
-        else searchQuery = `${genreInput} choreography`;
-        
+        else if (lowerInput === 'choreo') searchQuery = 'choreography dance';
+
         let publishedAfter = '';
         const now = new Date();
         if (timeRange === 'today') { now.setHours(0,0,0,0); publishedAfter = now.toISOString(); }
@@ -278,7 +281,7 @@
         if (videoType === 'shorts') videoDurationParam = 'short';
         else if (videoType === 'normal') videoDurationParam = 'medium';
 
-        let url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(searchQuery)}&type=video&order=${order}&videoDuration=${videoDurationParam}&maxResults=50&key=${API_KEY}`;
+        let url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(searchQuery)}&type=video&order=${order}&videoDuration=${videoDurationParam}&maxResults=24&key=${API_KEY}`;
         if (publishedAfter) url += `&publishedAfter=${publishedAfter}`;
         if (pageToken) url += `&pageToken=${pageToken}`;
         if (regionType !== 'all') url += `&relevanceLanguage=${regionType}`;
@@ -305,17 +308,10 @@
             statsData.items.forEach(item => {
                 videoDetailsMap[item.id] = { 
                     viewCount: parseInt(item.statistics.viewCount || 0), 
-                    duration: item.contentDetails.duration 
+                    duration: item.contentDetails.duration,
+                    description: item.snippet.description // [추가] 텍스트 분석용 설명글 파싱
                 };
             });
-
-            if (videoType === 'shorts') {
-                videos = videos.filter(video => {
-                    const detail = videoDetailsMap[video.id.videoId];
-                    if (!detail) return false;
-                    return !detail.duration.includes('M') || detail.duration.startsWith('PT1M');
-                });
-            }
 
             videoGrid.innerHTML = '';
             refreshBtn.style.display = 'block';
@@ -330,7 +326,7 @@
                 const viewCountString = detail ? detail.viewCount.toLocaleString() : '0';
 
                 videoGrid.innerHTML += `
-                    <div class="video-card" onclick="openStudio('${videoId}', '${title}')">
+                    <div class="video-card" onclick="openStudio('${videoId}', '${title}', '${encodeURIComponent(detail?.description || '')}')">
                         <div class="thumbnail-container"><img src="${thumbnail}"></div>
                         <div class="video-info">
                             <div class="video-title">${video.snippet.title}</div>
@@ -344,20 +340,59 @@
         }
     }
 
-    function openStudio(videoId, videoTitle) {
+    /* 🔥 [핵심 추가] 영상 메타데이터 분석 기반 자동 안무 해설 엔진 */
+    function analyzeDanceChoreography(title, rawDesc) {
+        const fullText = (title + " " + decodeURIComponent(rawDesc)).toLowerCase();
+        let difficulty = "중급 (Normal)";
+        let speed = "보통 속도 (Moderate)";
+        let commentary = "이 영상은 대중적인 구성의 안무 스타일입니다. 기본 바운스와 대형 전환 위주의 동선표 설계를 추천합니다.";
+
+        // 난이도 판단 규칙
+        if (fullText.includes("easy") || fullText.includes("초급") || fullText.includes("beginner") || fullText.includes("튜토리얼")) {
+            difficulty = "초급 (Easy)";
+            commentary = "비교적 동작이 직관적이고 반복적인 루틴이 많아 동선 이동 폭이 간결한 편입니다. 대형 중심점 고정 설계를 권장합니다.";
+        } else if (fullText.includes("hard") || fullText.includes("expert") || fullText.includes("전문가") || fullText.includes("상급") || fullText.includes("1밀리언") || fullText.includes("1million")) {
+            difficulty = "상급 ~ 전문가 (Challenging)";
+            commentary = "아이솔레이션과 고난도 풋워크가 융합된 복합 안무입니다. 파트별 개인 동선 꼬임 현상이 일어날 수 있으니 디테일한 스케치가 필요합니다.";
+        }
+
+        // 속도 판단 규칙
+        if (fullText.includes("fast") || fullText.includes("빠른") || fullText.includes("speed up") || fullText.includes("챌린지")) {
+            speed = "빠름 (Fast / Rush)";
+            if(difficulty.includes("상급")) commentary += " 또한 박자가 매우 쪼개져 있어 빠른 대형 전환 스케치 맵핑이 핵심입니다.";
+        } else if (fullText.includes("slow") || fullText.includes("느린") || fullText.includes("발라드") || fullText.includes("r&b")) {
+            speed = "느림 (Slow / Groove)";
+            commentary = "그루브와 선을 강조하는 정적인 무브 위주입니다. 동선의 흐름이 끊기지 않는 부드러운 대형 전환 구조가 이상적입니다.";
+        }
+
+        // 결과 출력 포맷팅
+        document.getElementById('aiAnalysisBox').innerHTML = `
+            <div><span class="ai-tag">추정 난이도</span> <b>${difficulty}</b></div>
+            <div style="margin: 4px 0;"><span class="ai-tag">체감 비트감</span> <b>${speed}</b></div>
+            <div style="margin-top:8px; font-size:0.85rem; color:#ddd; border-top:1px dashed #555; padding-top:6px;">💡 <b>스튜디오 진단 가이드:</b> ${commentary}</div>
+        `;
+
+        // 가상 셀렉터 세팅값 동기화
+        document.getElementById('danceDifficulty').value = difficulty;
+        document.getElementById('danceSpeed').value = speed;
+    }
+
+    function openStudio(videoId, videoTitle, encodedDesc) {
         currentVideoId = videoId;
-        document.getElementById('studioTitle').innerText = `🎬 분석: ${videoTitle}`;
+        document.getElementById('studioTitle').innerText = `🎬 안무 스튜디오 분석 모드: ${videoTitle}`;
         document.getElementById('studioOverlay').style.display = 'flex';
 
         if (player === null) {
             player = new YT.Player('ytPlayer', {
                 height: '100%', width: '100%', videoId: videoId,
-                playerVars: { 'autoplay': 1, 'modestbranding': 1, 'playsinline': 1 } // 🔥 인라인 재생 강제로 모바일 전체화면 튕김 차단
+                playerVars: { 'autoplay': 1, 'modestbranding': 1, 'playsinline': 1 }
             });
         } else {
             player.loadVideoById(videoId);
         }
 
+        // 텍스트 분석 가동
+        analyzeDanceChoreography(videoTitle, encodedDesc);
         loadStudioData(videoId);
         clearCanvas();
     }
@@ -377,12 +412,17 @@
     function addTimelineItem() {
         const timeVal = document.getElementById('timelineTime').value.trim();
         const descVal = document.getElementById('timelineDesc').value.trim();
-        if (!timeVal || !descVal) { alert('시간 정보와 안무 설명을 모두 입력하세요.'); return; }
+        if (!timeVal || !descVal) { alert('시간 정보와 안무 동선 설명을 입력해 주세요.'); return; }
 
-        const canvasData = canvas.toDataURL();
+        const canvasData = canvas.toDataURL(); // 스케치판 그림 캡처
         const item = { time: timeVal, desc: descVal, canvas: canvasData };
 
         let currentData = JSON.parse(localStorage.getItem(currentVideoId)) || { difficulty: '미지정', speed: '미지정', timelines: [] };
+        
+        // 자동분석 결과 유지 보완
+        currentData.difficulty = document.getElementById('danceDifficulty').value;
+        currentData.speed = document.getElementById('danceSpeed').value;
+        
         currentData.timelines.push(item);
         currentData.timelines.sort((a,b) => parseFloat(a.time.replace(':', '.')) - parseFloat(b.time.replace(':', '.')));
         
@@ -416,33 +456,32 @@
         }
     }
 
-    function saveStudioData() {
-        const difficulty = document.getElementById('danceDifficulty').value;
-        const speed = document.getElementById('danceSpeed').value;
-        let currentData = JSON.parse(localStorage.getItem(currentVideoId)) || { timelines: [] };
-        currentData.difficulty = difficulty;
-        currentData.speed = speed;
-        localStorage.setItem(currentVideoId, JSON.stringify(currentData));
-    }
-
     function loadStudioData(videoId) {
         const saved = localStorage.getItem(videoId);
-        document.getElementById('timelineList').innerHTML = '';
         if (saved) {
             const data = JSON.parse(saved);
-            document.getElementById('danceDifficulty').value = data.difficulty || '미지정';
-            document.getElementById('danceSpeed').value = data.speed || '미지정';
             if (data.timelines) renderTimelines(data.timelines);
         } else {
-            document.getElementById('danceDifficulty').value = '미지정';
-            document.getElementById('danceSpeed').value = '미지정';
+            document.getElementById('reportGrid').innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted); grid-column: 1/-1;">등록된 타임라인 동선표가 여기에 빌드됩니다.</div>';
+            document.getElementById('timelineList').innerHTML = '';
         }
     }
 
+    /* 🔥 [핵심 추가] 타임라인 렌더링 시 동시에 요약 리포트 그리드까지 함께 자동 빌드 */
     function renderTimelines(list) {
         const timelineListDiv = document.getElementById('timelineList');
+        const reportGrid = document.getElementById('reportGrid');
+        
         timelineListDiv.innerHTML = '';
+        reportGrid.innerHTML = '';
+
+        if(list.length === 0) {
+            reportGrid.innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted); grid-column: 1/-1;">등록된 타임라인 동선표가 여기에 빌드됩니다.</div>';
+            return;
+        }
+
         list.forEach((item, index) => {
+            // 1. 중간 타임라인 리스트 생성
             timelineListDiv.innerHTML += `
                 <div class="timeline-item" onclick="seekToTimeline('${item.time}', '${item.canvas || ''}')">
                     <div class="item-info">
@@ -451,10 +490,18 @@
                     </div>
                     <button class="btn btn-danger" onclick="event.stopPropagation(); deleteTimelineItem(${index});">삭제</button>
                 </div>`;
+            
+            // 2. 하단 리포트 요약 카드 동시 생성 (대형 썸네일 포함)
+            reportGrid.innerHTML += `
+                <div class="report-card" onclick="seekToTimeline('${item.time}', '${item.canvas || ''}')" style="cursor:pointer;">
+                    <img src="${item.canvas || 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'}">
+                    <div class="report-card-time">${item.time}</div>
+                    <span class="report-card-desc" title="${item.desc}">${item.desc}</span>
+                </div>`;
         });
     }
 
-    /* 드로잉 로직 */
+    /* 스케치북 드로잉 엔진 */
     function startDrawing(e) { isDrawing = true; [lastX, lastY] = [e.offsetX, e.offsetY]; }
     function draw(e) {
         if (!isDrawing) return;
@@ -465,7 +512,6 @@
     function setCanvasColor(color) { currentColor = color; ctx.strokeStyle = color; }
     function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
 
-    /* 🔥 모바일 터치이벤트 정밀 좌표 역계산 스크립트 */
     function handleTouchStart(e) {
         const touch = e.touches[0];
         const rect = canvas.getBoundingClientRect();
@@ -474,21 +520,14 @@
         lastY = touch.clientY - rect.top;
         e.preventDefault();
     }
-
     function handleTouchMove(e) {
         if (!isDrawing) return;
         const touch = e.touches[0];
         const rect = canvas.getBoundingClientRect();
         const currentX = touch.clientX - rect.left;
         const currentY = touch.clientY - rect.top;
-        
-        ctx.beginPath();
-        ctx.moveTo(lastX, lastY);
-        ctx.lineTo(currentX, currentY);
-        ctx.stroke();
-        
-        lastX = currentX;
-        lastY = currentY;
+        ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(currentX, currentY); ctx.stroke();
+        lastX = currentX; lastY = currentY;
         e.preventDefault();
     }
 </script>
