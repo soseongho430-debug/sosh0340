@@ -3,8 +3,8 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dance Choreography Finder</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dance Choreography & Formation Studio</title>
     <style>
         :root { 
             --bg-color: #121212; 
@@ -13,46 +13,97 @@
             --text-muted: #aaaaaa; 
             --accent-color: #ff4757; 
             --border-color: #333333; 
+            --studio-bg: #1a1a1a;
         }
-        body { background-color: var(--bg-color); color: var(--text-color); font-family: sans-serif; margin: 0; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        header { text-align: center; margin-bottom: 40px; }
-        h1 { color: var(--accent-color); font-size: 2.5rem; margin-bottom: 10px; }
-        .search-section { background-color: var(--card-bg); padding: 25px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 30px; }
-        .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
-        .search-box input { flex: 1; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); background-color: #2d2d2d; color: white; font-size: 1rem; }
-        .btn { padding: 0 30px; border-radius: 8px; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        body { background-color: var(--bg-color); color: var(--text-color); font-family: sans-serif; margin: 0; padding: 15px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 30px; }
+        h1 { color: var(--accent-color); font-size: 2rem; margin-bottom: 10px; }
+        .search-section { background-color: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 25px; }
+        .search-box { display: flex; gap: 8px; margin-bottom: 15px; }
+        .search-box input { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background-color: #2d2d2d; color: white; font-size: 1rem; min-width: 0; }
+        
+        .btn { padding: 10px 20px; border-radius: 8px; border: none; font-size: 0.95rem; font-weight: bold; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
         .btn-search { background-color: var(--accent-color); color: white; }
         .btn-refresh { background-color: #2f3542; color: white; display: none; }
-        .filters { display: flex; flex-wrap: wrap; gap: 20px; padding-top: 15px; border-top: 1px solid var(--border-color); }
-        .filter-group { display: flex; flex-direction: column; gap: 8px; }
-        .filter-group label { font-size: 0.9rem; color: var(--text-muted); font-weight: bold; }
-        .filter-group select { padding: 10px 15px; border-radius: 6px; background-color: #2d2d2d; color: white; border: 1px solid var(--border-color); cursor: pointer; min-width: 150px; }
-        .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
-        .video-card { background-color: var(--card-bg); border-radius: 10px; overflow: hidden; border: 1px solid var(--border-color); transition: transform 0.2s; }
-        .video-card:hover { transform: translateY(-5px); }
-        .video-card a { text-decoration: none; color: inherit; }
+        .btn-action { background-color: #3742fa; color: white; margin-top: 5px; width: 100%; }
+        .btn-danger { background-color: #ff4757; color: white; padding: 5px 10px; font-size: 0.8rem; }
+        
+        .filters { display: flex; flex-wrap: wrap; gap: 15px; padding-top: 15px; border-top: 1px solid var(--border-color); }
+        .filter-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 120px; }
+        .filter-group label { font-size: 0.85rem; color: var(--text-muted); font-weight: bold; }
+        .filter-group select { padding: 10px; border-radius: 6px; background-color: #2d2d2d; color: white; border: 1px solid var(--border-color); cursor: pointer; font-size: 0.9rem; }
+        
+        /* 비디오 그리드 */
+        .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+        .video-card { background-color: var(--card-bg); border-radius: 10px; overflow: hidden; border: 1px solid var(--border-color); cursor: pointer; transition: transform 0.2s; }
         .thumbnail-container { position: relative; width: 100%; padding-top: 56.25%; }
         .thumbnail-container img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
-        .video-info { padding: 15px; }
-        .video-title { font-size: 1rem; font-weight: bold; margin: 0 0 10px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }
-        .channel-name { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px; }
-        .video-meta { font-size: 0.8rem; color: var(--text-muted); display: flex; justify-content: space-between; }
-        .status-message { text-align: center; font-size: 1.2rem; color: var(--text-muted); margin-top: 50px; width: 100%; }
+        .video-info { padding: 12px; }
+        .video-title { font-size: 0.95rem; font-weight: bold; margin: 0 0 8px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }
+        .channel-name { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px; }
+        .video-meta { font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between; }
+        .status-message { text-align: center; font-size: 1.1rem; color: var(--text-muted); margin-top: 40px; width: 100%; }
+
+        /* ── 분석 스튜디오 모달 팝업 (모바일 최적화 반응형) ── */
+        .studio-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; padding: 10px; box-sizing: border-box; }
+        .studio-window { background-color: var(--studio-bg); border-radius: 12px; border: 1px solid var(--border-color); width: 100%; max-width: 1200px; height: 95vh; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        .studio-header { padding: 12px 20px; background-color: #222; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .studio-title { font-size: 1.05rem; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%; }
+        .close-btn { background: none; border: none; color: white; font-size: 2rem; cursor: pointer; line-height: 1; }
+        
+        .studio-body { display: flex; flex-direction: row; flex: 1; overflow: hidden; }
+        
+        /* 왼쪽: 플레이어 사이드바 */
+        .player-sidebar { flex: 1.2; background-color: #000; display: flex; flex-direction: column; justify-content: center; position: relative; border-right: 1px solid var(--border-color); }
+        .video-wrapper { position: relative; padding-top: 56.25%; width: 100%; }
+        .video-wrapper iframe, .video-wrapper div { position: absolute; top:0; left:0; width:100%; height:100%; }
+
+        /* 오른쪽: 분석 사이드바 */
+        .analysis-sidebar { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background-color: #1e1e1e; }
+        .section-title { font-size: 1rem; color: var(--accent-color); font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #444; padding-bottom: 5px; }
+        
+        .meta-selectors { display: flex; gap: 10px; background: #2a2a2a; padding: 10px; border-radius: 8px; }
+        .select-box { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+        .select-box select { padding: 8px; background: #121212; color: white; border: 1px solid #444; border-radius: 4px; font-size: 0.85rem; }
+
+        /* 동선 캔버스 그리기 (🔥 모바일 터치 스크롤 차단 핵심) */
+        .canvas-section { display: flex; flex-direction: column; gap: 6px; }
+        .canvas-container { position: relative; background: #2d3436; border: 2px dashed #555; border-radius: 8px; width: 100%; max-width: 360px; margin: 0 auto; aspect-ratio: 4/3; }
+        canvas { width: 100%; height: 100%; display: block; cursor: crosshair; touch-action: none; } /* 🔥 touch-action 추가 */
+        .canvas-tools { display: flex; justify-content: space-between; gap: 5px; max-width: 360px; margin: 0 auto; width: 100%; }
+        .canvas-tools button { flex: 1; padding: 8px; font-size: 0.8rem; background: #444; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        
+        .timeline-input-group { display: flex; gap: 6px; margin-top: 2px; }
+        .timeline-input-group input { flex: 1; padding: 8px 12px; background: #121212; border: 1px solid #444; color: white; border-radius: 6px; font-size: 0.9rem; min-width: 0; }
+        .timeline-list { display: flex; flex-direction: column; gap: 6px; max-height: 180px; overflow-y: auto; margin-top: 8px; }
+        .timeline-item { background: #2a2a2a; padding: 8px 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--accent-color); cursor: pointer; }
+        .item-info { display: flex; flex-direction: column; gap: 2px; }
+        .item-time { font-weight: bold; color: #ff4757; font-size: 0.85rem; }
+        .item-desc { font-size: 0.85rem; color: #fff; }
+
+        /* 📱 모바일/태블릿 화면을 위한 반응형 미디어 쿼리 */
+        @media (max-width: 768px) {
+            .studio-body { flex-direction: column; overflow-y: auto; }
+            .player-sidebar { flex: none; width: 100%; }
+            .analysis-sidebar { flex: none; width: 100%; overflow-y: visible; }
+            .studio-window { height: 98vh; }
+        }
     </style>
+    <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
 <div class="container">
     <header>
-        <h1>Dance & Choreography Finder</h1>
-        <p>원하는 장르를 검색하고 최신/인기 안무 영상을 필터링해 보세요.</p>
+        <h1>Dance & Formation Studio</h1>
+        <p>안무 검색 후 영상을 클릭해 실시간 난이도 분석 및 구간별 동선표를 설계해 보세요.</p>
     </header>
     <main>
         <div class="search-section">
             <div class="search-box">
-                <input type="text" id="genreInput" placeholder="춤 장르를 입력하세요 (예: K-pop, HipHop, choreo)">
+                <input type="text" id="genreInput" placeholder="춤 장르를 입력하세요 (예: K-pop, HipHop)">
                 <button class="btn btn-search" onclick="initialSearch()">검색</button>
-                <button class="btn btn-refresh" id="refreshBtn" onclick="refreshVideos()">🔄 다른 영상 보기 (새로고침)</button>
+                <button class="btn btn-refresh" id="refreshBtn" onclick="refreshVideos()">🔄 새로고침</button>
             </div>
             <div class="filters">
                 <div class="filter-group">
@@ -64,21 +115,21 @@
                     </select>
                 </div>
                 <div class="filter-group">
-                    <label for="timeRange">기간 및 정렬 조건</label>
+                    <label for="timeRange">기간 및 정렬</label>
                     <select id="timeRange">
-                        <option value="today">당일 업로드 (최신순)</option>
-                        <option value="week">최근 1주일 (조회수 높은순)</option>
-                        <option value="month">최근 한 달 (조회수 높은순)</option>
-                        <option value="year">올해 업로드 (조회수 높은순)</option>
-                        <option value="allTime">기간 전체 (조회수 높은순)</option>
+                        <option value="today">당일 (최신순)</option>
+                        <option value="week">최근 1주 (조회수순)</option>
+                        <option value="month" selected>최근 한 달 (조회수순)</option>
+                        <option value="year">올해 (조회수순)</option>
+                        <option value="allTime">기간 전체 (조회수순)</option>
                     </select>
                 </div>
                 <div class="filter-group">
                     <label for="regionType">국가 우선순위</label>
                     <select id="regionType">
                         <option value="all">제한 없음</option>
-                        <option value="ko">한국 영상 우선</option>
-                        <option value="en">외국(영어권) 영상 우선</option>
+                        <option value="ko">한국 우선</option>
+                        <option value="en">외국 우선</option>
                     </select>
                 </div>
             </div>
@@ -89,21 +140,109 @@
     </main>
 </div>
 
+<div class="studio-overlay" id="studioOverlay">
+    <div class="studio-window">
+        <div class="studio-header">
+            <div class="studio-title" id="studioTitle">안무 분석 스튜디오</div>
+            <button class="close-btn" onclick="closeStudio()">×</button>
+        </div>
+        <div class="studio-body">
+            <div class="player-sidebar">
+                <div class="video-wrapper">
+                    <div id="ytPlayer"></div>
+                </div>
+            </div>
+            <div class="analysis-sidebar">
+                <div>
+                    <div class="section-title">📊 안무 속도 & 난이도 분석</div>
+                    <div class="meta-selectors">
+                        <div class="select-box">
+                            <label style="font-size:0.75rem; color:var(--text-muted);">난이도</label>
+                            <select id="danceDifficulty" onchange="saveStudioData()">
+                                <option value="미지정">선택하세요</option>
+                                <option value="초급 (Easy)">초급 (Easy)</option>
+                                <option value="중급 (Normal)">중급 (Normal)</option>
+                                <option value="상급 (Hard)">상급 (Hard)</option>
+                                <option value="전문가 (Challenging)">전문가 (Challenging)</option>
+                            </select>
+                        </div>
+                        <div class="select-box">
+                            <label style="font-size:0.75rem; color:var(--text-muted);">체감 속도</label>
+                            <select id="danceSpeed" onchange="saveStudioData()">
+                                <option value="미지정">선택하세요</option>
+                                <option value="느림 (Slow)">느림 (Slow)</option>
+                                <option value="보통 (Moderate)">보통 (Moderate)</option>
+                                <option value="빠름 (Fast)">빠름 (Fast)</option>
+                                <option value="매우 빠름 (Rush)">매우 빠름 (Rush)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="canvas-section">
+                    <div class="section-title">📐 무대 대형 / 동선 스케치 패드</div>
+                    <div class="canvas-container">
+                        <canvas id="formationCanvas" width="400" height="300"></canvas>
+                    </div>
+                    <div class="canvas-tools">
+                        <button onclick="setCanvasColor('#ff4757')" style="background:#ff4757; border-radius: 50%; max-width:30px; height:30px;"></button>
+                        <button onclick="setCanvasColor('#2ed573')" style="background:#2ed573; border-radius: 50%; max-width:30px; height:30px;"></button>
+                        <button onclick="setCanvasColor('#1e90ff')" style="background:#1e90ff; border-radius: 50%; max-width:30px; height:30px;"></button>
+                        <button onclick="setCanvasColor('#ffffff')" style="background:#ffffff; color:#000;">🎨</button>
+                        <button onclick="clearCanvas()" style="background:#747d8c;">초기화</button>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="section-title">⏱️ 타임라인별 안무 및 동선 관리</div>
+                    <button class="btn btn-action" onclick="syncCurrentTime()">🕒 현재 영상 재생시간 가져오기</button>
+                    <div class="timeline-input-group" style="margin-top:8px;">
+                        <input type="text" id="timelineTime" placeholder="시간 (예: 0:45)">
+                        <input type="text" id="timelineDesc" placeholder="안무 특징 및 동선 설명">
+                        <button class="btn btn-search" onclick="addTimelineItem()">추가</button>
+                    </div>
+                    <div class="timeline-list" id="timelineList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-    // ⚠️ 중요: 발급받으신 본인의 구글 YouTube Data API v3 키를 여기에 넣으셔야 실제로 작동합니다.
+    // ⚠️ 중요: 발급받으신 본인의 구글 YouTube Data API v3 키를 여기에 입력해 주세요.
     const API_KEY = 'AIzaSyDjb6EuJcqPFbhwyIShQHDl1cwF32zd69U'; 
 
     let nextPageToken = ''; 
-    let currentQuery = '';
+    let player = null; 
+    let currentVideoId = '';
+    
+    let canvas, ctx;
+    let isDrawing = false;
+    let lastX = 0, lastY = 0;
+    let currentColor = '#ffffff';
 
-    function initialSearch() {
-        nextPageToken = ''; 
-        fetchDanceVideos();
-    }
+    window.onload = function() {
+        canvas = document.getElementById('formationCanvas');
+        ctx = canvas.getContext('2d'); // 🔥 오타 전면 수정완료
+        ctx.strokeStyle = currentColor;
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        ctx.lineWidth = 4;
 
-    function refreshVideos() {
-        fetchDanceVideos(nextPageToken);
-    }
+        // 마우스 드로잉 이벤트
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+        
+        // 🔥 모바일 터치 드로잉 이벤트 완벽 대응
+        canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+        canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+        canvas.addEventListener('touchend', stopDrawing);
+    };
+
+    function initialSearch() { nextPageToken = ''; fetchDanceVideos(); }
+    function refreshVideos() { fetchDanceVideos(nextPageToken); }
 
     async function fetchDanceVideos(pageToken = '') {
         const genreInput = document.getElementById('genreInput').value.trim();
@@ -114,27 +253,21 @@
         const refreshBtn = document.getElementById('refreshBtn');
 
         if (!genreInput) { alert('장르를 입력해 주세요!'); return; }
-        if (API_KEY === ' ') {
-    alert('유튜브 API_KEY를 소스 코드 내에 입력하셔야 실시간 조회가 가능합니다.');
-    return;
-}
-        videoGrid.innerHTML = '<div class="status-message">조건에 맞는 최적의 안무 영상을 탐색 중입니다...</div>';
+        if (!API_KEY || API_KEY.trim() === '' || API_KEY === 'YOUR_YOUTUBE_API_KEY_HERE') {
+            alert('유튜브 API_KEY를 정확히 입력하셔야 조회가 가능합니다.');
+            return;
+        }
+
+        videoGrid.innerHTML = '<div class="status-message">조건에 맞는 영상을 탐색 중입니다...</div>';
         
-        // 🔥 핵심 수정 1: 검색 조건 세분화 (k-pop, choreo, 일반 장르)
         let searchQuery = '';
         const lowerInput = genreInput.toLowerCase();
-        
-        if (lowerInput === 'k-pop' || lowerInput === 'kpop') {
-            searchQuery = 'k-pop 안무영상'; // k-pop 입력 시 한글 '안무영상' 결합
-        } else if (lowerInput === 'choreo') {
-            searchQuery = 'choreography';
-        } else {
-            searchQuery = `${genreInput} choreography`;
-        }
+        if (lowerInput === 'k-pop' || lowerInput === 'kpop') searchQuery = 'k-pop 안무영상';
+        else if (lowerInput === 'choreo') searchQuery = 'choreography';
+        else searchQuery = `${genreInput} choreography`;
         
         let publishedAfter = '';
         const now = new Date();
-        
         if (timeRange === 'today') { now.setHours(0,0,0,0); publishedAfter = now.toISOString(); }
         else if (timeRange === 'week') { now.setDate(now.getDate() - 7); publishedAfter = now.toISOString(); }
         else if (timeRange === 'month') { now.setDate(now.getDate() - 30); publishedAfter = now.toISOString(); }
@@ -184,27 +317,12 @@
                 });
             }
 
-            if (pageToken) {
-                videos = videos.sort(() => Math.random() - 0.5);
-            }
-
-            if (timeRange !== 'today') {
-                videos.sort((a, b) => {
-                    const viewA = videoDetailsMap[a.id.videoId]?.viewCount || 0;
-                    const viewB = videoDetailsMap[b.id.videoId]?.viewCount || 0;
-                    return viewB - viewA;
-                });
-            }
-
             videoGrid.innerHTML = '';
-            if (videos.length === 0) { videoGrid.innerHTML = '<div class="status-message">조건에 일치하는 영상이 없습니다.</div>'; return; }
-
             refreshBtn.style.display = 'block';
 
-            // 🔥 핵심 수정 2: slice(0, 24)를 삭제하고 검색된 최대 50개 영상이 모두 노출되도록 변경
             videos.forEach(video => {
                 const videoId = video.id.videoId;
-                const title = video.snippet.title;
+                const title = video.snippet.title.replace(/"/g, '&quot;');
                 const channelTitle = video.snippet.channelTitle;
                 const thumbnail = video.snippet.thumbnails.medium.url;
                 const publishedAt = new Date(video.snippet.publishedAt).toLocaleDateString();
@@ -212,20 +330,163 @@
                 const viewCountString = detail ? detail.viewCount.toLocaleString() : '0';
 
                 videoGrid.innerHTML += `
-                    <div class="video-card">
-                        <a href="https://www.youtube.com/watch?v=${videoId}" target="_blank">
-                            <div class="thumbnail-container"><img src="${thumbnail}"></div>
-                            <div class="video-info">
-                                <div class="video-title">${title}</div>
-                                <div class="channel-name">${channelTitle}</div>
-                                <div class="video-meta"><span>👁️ ${viewCountString}회</span><span>📅 ${publishedAt}</span></div>
-                            </div>
-                        </a>
+                    <div class="video-card" onclick="openStudio('${videoId}', '${title}')">
+                        <div class="thumbnail-container"><img src="${thumbnail}"></div>
+                        <div class="video-info">
+                            <div class="video-title">${video.snippet.title}</div>
+                            <div class="channel-name">${channelTitle}</div>
+                            <div class="video-meta"><span>👁️ ${viewCountString}회</span><span>📅 ${publishedAt}</span></div>
+                        </div>
                     </div>`;
             });
         } catch (error) {
             videoGrid.innerHTML = `<div class="status-message" style="color: var(--accent-color);">오류: ${error.message}</div>`;
         }
+    }
+
+    function openStudio(videoId, videoTitle) {
+        currentVideoId = videoId;
+        document.getElementById('studioTitle').innerText = `🎬 분석: ${videoTitle}`;
+        document.getElementById('studioOverlay').style.display = 'flex';
+
+        if (player === null) {
+            player = new YT.Player('ytPlayer', {
+                height: '100%', width: '100%', videoId: videoId,
+                playerVars: { 'autoplay': 1, 'modestbranding': 1, 'playsinline': 1 } // 🔥 모바일 전체화면 강제 방지
+            });
+        } else {
+            player.loadVideoById(videoId);
+        }
+
+        loadStudioData(videoId);
+        clearCanvas();
+    }
+
+    function closeStudio() { if (player) { player.stopVideo(); } document.getElementById('studioOverlay').style.display = 'none'; }
+
+    function syncCurrentTime() {
+        if (player && typeof player.getCurrentTime === 'function') {
+            const rawTime = player.getCurrentTime();
+            const minutes = Math.floor(rawTime / 60);
+            const seconds = Math.floor(rawTime % 60);
+            document.getElementById('timelineTime').value = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+    }
+
+    function addTimelineItem() {
+        const timeVal = document.getElementById('timelineTime').value.trim();
+        const descVal = document.getElementById('timelineDesc').value.trim();
+        if (!timeVal || !descVal) { alert('시간과 코멘트를 입력해 주세요.'); return; }
+
+        const canvasData = canvas.toDataURL();
+        const item = { time: timeVal, desc: descVal, canvas: canvasData };
+
+        let currentData = JSON.parse(localStorage.getItem(currentVideoId)) || { difficulty: '미지정', speed: '미지정', timelines: [] };
+        currentData.timelines.push(item);
+        localStorage.setItem(currentVideoId, JSON.stringify(currentData));
+        
+        document.getElementById('timelineTime').value = '';
+        document.getElementById('timelineDesc').value = '';
+        clearCanvas();
+        renderTimelines(currentData.timelines);
+    }
+
+    function deleteTimelineItem(index) {
+        let currentData = JSON.parse(localStorage.getItem(currentVideoId));
+        if (currentData && currentData.timelines) {
+            currentData.timelines.splice(index, 1);
+            localStorage.setItem(currentVideoId, JSON.stringify(currentData));
+            renderTimelines(currentData.timelines);
+        }
+    }
+
+    function seekToTimeline(timeStr, canvasImage) {
+        if (player) {
+            const parts = timeStr.split(':');
+            const totalSeconds = parseInt(parts[0]) * 60 + parseFloat(parts[1]);
+            player.seekTo(totalSeconds, true);
+        }
+        if (canvasImage) {
+            const img = new Image();
+            img.onload = function() { clearCanvas(); ctx.drawImage(img, 0, 0); };
+            img.src = canvasImage;
+        }
+    }
+
+    function saveStudioData() {
+        const difficulty = document.getElementById('danceDifficulty').value;
+        const speed = document.getElementById('danceSpeed').value;
+        let currentData = JSON.parse(localStorage.getItem(currentVideoId)) || { timelines: [] };
+        currentData.difficulty = difficulty;
+        currentData.speed = speed;
+        localStorage.setItem(currentVideoId, JSON.stringify(currentData));
+    }
+
+    function loadStudioData(videoId) {
+        const saved = localStorage.getItem(videoId);
+        document.getElementById('timelineList').innerHTML = '';
+        if (saved) {
+            const data = JSON.parse(saved);
+            document.getElementById('danceDifficulty').value = data.difficulty || '미지정';
+            document.getElementById('danceSpeed').value = data.speed || '미지정';
+            if (data.timelines) renderTimelines(data.timelines);
+        } else {
+            document.getElementById('danceDifficulty').value = '미지정';
+            document.getElementById('danceSpeed').value = '미지정';
+        }
+    }
+
+    function renderTimelines(list) {
+        const timelineListDiv = document.getElementById('timelineList');
+        timelineListDiv.innerHTML = '';
+        list.forEach((item, index) => {
+            timelineListDiv.innerHTML += `
+                <div class="timeline-item" onclick="seekToTimeline('${item.time}', '${item.canvas || ''}')">
+                    <div class="item-info">
+                        <span class="item-time">⏱️ ${item.time}</span>
+                        <span class="item-desc">${item.desc}</span>
+                    </div>
+                    <button class="btn btn-danger" onclick="event.stopPropagation(); deleteTimelineItem(${index});">삭제</button>
+                </div>`;
+        });
+    }
+
+    /* 드로잉 로직 */
+    function startDrawing(e) { isDrawing = true; [lastX, lastY] = [e.offsetX, e.offsetY]; }
+    function draw(e) {
+        if (!isDrawing) return;
+        ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke();
+        [lastX, lastY] = [e.offsetX, e.offsetY];
+    }
+    function stopDrawing() { isDrawing = false; }
+    function setCanvasColor(color) { currentColor = color; ctx.strokeStyle = color; }
+    function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+
+    /* 🔥 모바일 터치 이벤트의 절대 좌표 계산 변환 및 스크롤 튕김 제어 */
+    function handleTouchStart(e) {
+        const touch = e.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        isDrawing = true;
+        lastX = touch.clientX - rect.left;
+        lastY = touch.clientY - rect.top;
+        e.preventDefault();
+    }
+
+    function handleTouchMove(e) {
+        if (!isDrawing) return;
+        const touch = e.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        const currentX = touch.clientX - rect.left;
+        const currentY = touch.clientY - rect.top;
+        
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(currentX, currentY);
+        ctx.stroke();
+        
+        lastX = currentX;
+        lastY = currentY;
+        e.preventDefault();
     }
 </script>
 </body>
