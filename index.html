@@ -40,7 +40,6 @@
         .thumbnail-container img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
         .video-info { padding: 12px; }
         .video-title { font-size: 0.95rem; font-weight: bold; margin: 0 0 8px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }
-        .channel-name { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px; }
         .video-meta { font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between; }
         .status-message { text-align: center; font-size: 1.1rem; color: var(--text-muted); margin-top: 40px; width: 100%; grid-column: 1 / -1; }
 
@@ -70,9 +69,11 @@
         .canvas-section { display: flex; flex-direction: column; gap: 6px; }
         .canvas-container { position: relative; background: #181818; border: 2px solid #333; border-radius: 8px; width: 100%; max-width: 400px; margin: 0 auto; aspect-ratio: 4/3; overflow: hidden; }
         canvas { width: 100%; height: 100%; display: block; cursor: default; touch-action: none; }
-        .canvas-tools { display: flex; justify-content: space-between; gap: 5px; max-width: 400px; margin: 0 auto; width: 100%; }
-        .canvas-tools button { flex: 1; padding: 8px; font-size: 0.8rem; background: #2f3542; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .canvas-tools { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; max-width: 400px; margin: 0 auto; width: 100%; }
+        .canvas-tools button { padding: 8px; font-size: 0.8rem; background: #2f3542; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .canvas-tools button:hover { background: #ff4757; }
+        .people-controls { grid-column: 1 / -1; display: flex; gap: 5px; background: #252525; padding: 4px; border-radius: 4px; justify-content: center; align-items: center; }
+        .count-display { font-size: 0.85rem; font-weight: bold; color: #2ed573; min-width: 50px; text-align: center; }
         
         .timeline-input-group { display: flex; gap: 6px; margin-top: 2px; }
         .timeline-input-group input { flex: 1; padding: 8px 12px; background: #121212; border: 1px solid #444; color: white; border-radius: 6px; font-size: 0.9rem; min-width: 0; }
@@ -104,7 +105,7 @@
 <div class="container">
     <header>
         <h1>Dance & Formation Studio</h1>
-        <p>무대 격자 위 마커들을 드래그하여 안무 동선표 리포트를 디자인하세요. (API 키가 없어도 데모 모드로 작동합니다)</p>
+        <p>무대 격자 위 마커들을 드래그하여 안무 동선표 리포트를 디자인하세요. (인원 맞춤 조절 가능)</p>
     </header>
     <main>
         <div class="search-section">
@@ -119,7 +120,7 @@
                     <select id="videoType">
                         <option value="all">전체 비디오</option>
                         <option value="shorts">Shorts (쇼츠)</option>
-                        <option value="normal">일반 동영상</option>
+                        <option value="normal" selected>일반 동영상</option>
                     </select>
                 </div>
                 <div class="filter-group">
@@ -172,9 +173,14 @@
                         <canvas id="formationCanvas" width="400" height="300"></canvas>
                     </div>
                     <div class="canvas-tools">
+                        <div class="people-controls">
+                            <button style="background:#ff4757; padding:4px 10px;" onclick="adjustDancerCount(-1)">➖ 인원 감소</button>
+                            <span class="count-display" id="dancerCountDisplay">11명</span>
+                            <button style="background:#2ed573; padding:4px 10px;" onclick="adjustDancerCount(1)">➕ 인원 추가</button>
+                        </div>
                         <button onclick="resetMarkers()">🔄 대형 초기화</button>
                         <button onclick="spreadFormation('line')">➖ 1열 가로대형</button>
-                        <button onclick="spreadFormation('vShape')">📐 V자 대형</button>
+                        <button onclick="spreadFormation('vShape')" style="grid-column: span 2;">📐 V자 대형 균등분배</button>
                     </div>
                 </div>
 
@@ -201,8 +207,6 @@
 </div>
 
 <script>
-    // ⚠️ 여기에 실제 유튜브 API 키를 넣으면 실제 유튜브 검색 데이터를 가져옵니다.
-    // 비워둘 경우 아래 내장된 가짜 안무 데이터(Demo Mode)가 작동합니다.
     const API_KEY = 'AIzaSyDjb6EuJcqPFbhwyIShQHDl1cwF32zd69U'; 
 
     let nextPageToken = ''; 
@@ -212,6 +216,7 @@
     
     let canvas, ctx;
     let dancers = [];
+    let currentMaxDancers = 11; // 기본 댄서 수 설정
     let selectedDancer = null;
     const dancerRadius = 13;
 
@@ -235,24 +240,46 @@
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2;
 
-        const defaultPositions = [
+        // 마커 생성 풀 규칙 정의
+        const masterPositions = [
             { x: centerX, y: centerY - 60, color: '#ff4757' }, 
             { x: centerX - 40, y: centerY - 30, color: '#ff4757' }, 
-            { x: centerX - 60, y: centerY + 10, color: '#ff4757' }, 
-            { x: centerX - 30, y: centerY + 50, color: '#ff4757' }, 
-            { x: centerX, y: centerY + 80, color: '#ff4757' }, 
-            { x: centerX + 30, y: centerY + 50, color: '#ff4757' }, 
-            { x: centerX + 60, y: centerY + 10, color: '#ff4757' }, 
             { x: centerX + 40, y: centerY - 30, color: '#ff4757' }, 
+            { x: centerX - 60, y: centerY + 10, color: '#ff4757' }, 
+            { x: centerX + 60, y: centerY + 10, color: '#ff4757' }, 
+            { x: centerX - 30, y: centerY + 50, color: '#ff4757' }, 
+            { x: centerX + 30, y: centerY + 50, color: '#ff4757' }, 
+            { x: centerX, y: centerY + 80, color: '#ff4757' }, 
             { x: centerX - 90, y: centerY - 30, color: '#ffa502' }, 
             { x: centerX + 90, y: centerY - 30, color: '#ffa502' }, 
             { x: centerX, y: centerY + 20, color: '#ffa502' }  
         ];
 
-        defaultPositions.forEach((pos, i) => {
-            dancers.push({ id: i + 1, x: pos.x, y: pos.y, color: pos.color });
-        });
+        // 설정된 인원만큼만 유동적으로 빌드
+        for (let i = 0; i < currentMaxDancers; i++) {
+            if (masterPositions[i]) {
+                dancers.push({ id: i + 1, x: masterPositions[i].x, y: masterPositions[i].y, color: masterPositions[i].color });
+            } else {
+                // 기본 풀 범위를 초과해서 추가할 경우 자동 랜덤 그리드 내부 분배
+                dancers.push({ 
+                    id: i + 1, 
+                    x: centerX + (Math.random() * 120 - 60), 
+                    y: centerY + (Math.random() * 100 - 50), 
+                    color: '#3742fa' 
+                });
+            }
+        }
+        document.getElementById('dancerCountDisplay').innerText = `${currentMaxDancers}명`;
         drawStage();
+    }
+
+    // 인원 실시간 업앤다운 핸들러
+    function adjustDancerCount(amount) {
+        let newCount = currentMaxDancers + amount;
+        if (newCount < 1) newCount = 1;
+        if (newCount > 30) { alert('최대 배치 인원은 30명입니다.'); return; }
+        currentMaxDancers = newCount;
+        initDancers();
     }
 
     function drawStage() {
@@ -337,15 +364,17 @@
     function spreadFormation(type) {
         const cx = canvas.width / 2;
         const cy = canvas.height / 2;
+        const count = dancers.length;
+
         if (type === 'line') {
-            const startX = cx - 150;
-            const step = 300 / 10;
+            const startX = cx - 140;
+            const step = count > 1 ? 280 / (count - 1) : 0;
             dancers.forEach((d, i) => { d.x = startX + (i * step); d.y = cy; });
         } else if (type === 'vShape') {
             dancers.forEach((d, i) => {
-                if (i === 0) { d.x = cx; d.y = cy + 40; }
-                else if (i % 2 === 1) { d.x = cx - (Math.ceil(i/2) * 30); d.y = cy + 40 - (Math.ceil(i/2) * 25); }
-                else { d.x = cx + (Math.ceil(i/2) * 30); d.y = cy + 40 - (Math.ceil(i/2) * 25); }
+                if (i === 0) { d.x = cx; d.y = cy + 50; }
+                else if (i % 2 === 1) { d.x = cx - (Math.ceil(i/2) * 35); d.y = cy + 50 - (Math.ceil(i/2) * 25); }
+                else { d.x = cx + (Math.ceil(i/2) * 35); d.y = cy + 50 - (Math.ceil(i/2) * 25); }
             });
         }
         drawStage();
@@ -354,26 +383,44 @@
     function initialSearch() { nextPageToken = ''; fetchDanceVideos(); }
     function refreshVideos() { fetchDanceVideos(nextPageToken); }
 
-    // 🛠️ 핵심 변경: API 키가 없거나 에러 발생 시 작동하는 가짜(Mock) 안무 비디오 셋업 엔진
+    // 🛠️ 필터 조건이 반영되도록 리모델링된 데모 데이터 로더 엔진
     function loadMockVideos() {
         const videoGrid = document.getElementById('videoGrid');
         const refreshBtn = document.getElementById('refreshBtn');
+        const filterType = document.getElementById('videoType').value; // 'all', 'shorts', 'normal'
         
-        const mockData = [
-            { id: 'dQw4w9WgXcQ', title: '[CHOREOGRAPHY] 에스파(aespa) - Supernova 안무 영상 (Fix ver.)', views: '2,401,952', desc: 'easy beginner 초급 기초 튜토리얼' },
-            { id: '9bZkp7q19f0', title: '[MIRROR] 뉴진스(NewJeans) - How Sweet Dance Practice (거울 모드)', views: '1,105,431', desc: 'fast challenge 챌린지 힙합 템포 빠름' },
-            { id: 'JzFafW6wI_s', title: 'CORTIS (코르티스) - GO! Dance Practice (Fix ver.)', views: '104,233', desc: 'hard expert 상급 전문가 원밀리언 스튜디오' },
-            { id: 'An6LvWQuj_8', title: '[포메이션 정밀 분석] 아이브(IVE) - Accendio 대형선 분석', views: '450,119', desc: 'groove slow 느린 비트 대형 이동' }
+        // 원본 가짜 데이터 풀
+        const rawMockPool = [
+            { id: 'dQw4w9WgXcQ', type: 'normal', title: '[CHOREOGRAPHY] 에스파(aespa) - Supernova 안무 영상 (Fix ver.)', views: '2,401,952', desc: 'easy beginner 초급 기초 튜토리얼' },
+            { id: '9bZkp7q19f0', type: 'shorts', title: '뉴진스(NewJeans) How Sweet 챌린지 거울모드 #Shorts', views: '1,105,431', desc: 'fast challenge 챌린지 힙합 템포 빠름' },
+            { id: 'JzFafW6wI_s', type: 'normal', title: 'CORTIS (코르티스) - GO! Dance Practice (Fix ver.)', views: '104,233', desc: 'hard expert 상급 전문가 원밀리언 스튜디오' },
+            { id: 'An6LvWQuj_8', type: 'normal', title: '[포메이션 정밀 분석] 아이브(IVE) - Accendio 대형선 분석', views: '450,119', desc: 'groove slow 느린 비트 대형 이동' },
+            { id: 'ytK_a2b3c4d', type: 'shorts', title: '아일릿(ILLIT) Magnetic 포인트 안무 1분 요약 #shorts', views: '890,211', desc: '포인트 안무 따라하기 숏폼' }
         ];
+
+        // 유저가 선택한 조건에 맞춰 필터링 필터 구현
+        let filteredPool = rawMockPool.filter(item => {
+            if (filterType === 'shorts') return item.type === 'shorts';
+            if (filterType === 'normal') return item.type === 'normal';
+            return true; 
+        });
 
         videoGrid.innerHTML = '';
         refreshBtn.style.display = 'block';
 
-        mockData.forEach(video => {
+        if (filteredPool.length === 0) {
+            videoGrid.innerHTML = '<div class="status-message">해당 조건에 맞는 데모 비디오가 존재하지 않습니다.</div>';
+            return;
+        }
+
+        filteredPool.forEach(video => {
             globalVideoDetails[video.id] = { viewCount: video.views, title: video.title, description: video.desc };
             
+            // 안전한 문자열 치환을 활용한 깨짐 현상 사전 방지
+            const safeTitle = encodeURIComponent(video.title);
+
             videoGrid.innerHTML += `
-                <div class="video-card" onclick="openStudio('${video.id}', '${video.title.replace(/"/g, '&quot;')}')">
+                <div class="video-card" onclick="openStudio('${video.id}', '${safeTitle}')">
                     <div class="thumbnail-container">
                         <img src="https://img.youtube.com/vi/${video.id}/mqdefault.jpg">
                     </div>
@@ -391,7 +438,6 @@
 
         if (!genreInput) { alert('검색어를 입력해 주세요!'); return; }
         
-        // API 키가 없으면 실제 통신을 건너뛰고 바로 내장 데모 데이터를 로드합니다.
         if (!API_KEY || API_KEY.trim() === '' || API_KEY === 'YOUR_YOUTUBE_API_KEY_HERE') {
             loadMockVideos();
             return;
@@ -406,7 +452,6 @@
             const response = await fetch(url);
             const data = await response.json();
             
-            // 만약 키가 유효하지 않아 에러 응답을 받으면 가짜 데이터 모드로 전환
             if(data.error) { loadMockVideos(); return; }
 
             let videos = data.items;
@@ -431,21 +476,21 @@
             videos.forEach(video => {
                 const videoId = video.id.videoId;
                 const detail = globalVideoDetails[videoId];
-                const title = (detail ? detail.title : video.snippet.title).replace(/"/g, '&quot;');
+                const rawTitle = detail ? detail.title : video.snippet.title;
+                const safeTitle = encodeURIComponent(rawTitle);
                 const thumbnail = video.snippet.thumbnails.medium.url;
                 const viewCountString = detail ? detail.viewCount : '0';
 
                 videoGrid.innerHTML += `
-                    <div class="video-card" onclick="openStudio('${videoId}', '${title}')">
+                    <div class="video-card" onclick="openStudio('${videoId}', '${safeTitle}')">
                         <div class="thumbnail-container"><img src="${thumbnail}"></div>
                         <div class="video-info">
-                            <div class="video-title">${video.snippet.title}</div>
+                            <div class="video-title">${rawTitle}</div>
                             <div class="video-meta"><span>👁️ ${viewCountString}회</span></div>
                         </div>
                     </div>`;
             });
         } catch (error) {
-            // 통신 장애 등 예외 발생 시 안전하게 가짜 데이터 실행
             loadMockVideos();
         }
     }
@@ -474,118 +519,14 @@
         `;
     }
 
-    function openStudio(videoId, videoTitle) {
+    function openStudio(videoId, encodedTitle) {
         currentVideoId = videoId;
-        document.getElementById('studioTitle').innerText = `🎬 안무 스튜디오 분석 모드: ${videoTitle}`;
+        const decodedTitle = decodeURIComponent(encodedTitle);
+        
+        document.getElementById('studioTitle').innerText = `🎬 안무 스튜디오 분석 모드: ${decodedTitle}`;
         document.getElementById('studioOverlay').style.display = 'flex';
 
         if (player === null) {
             player = new YT.Player('ytPlayer', {
                 height: '100%', width: '100%', videoId: videoId,
-                playerVars: { 'autoplay': 1, 'modestbranding': 1, 'playsinline': 1 }
-            });
-        } else { player.loadVideoById(videoId); }
-
-        analyzeDanceChoreography(videoId, videoTitle);
-        loadStudioData(videoId);
-        initDancers();
-    }
-
-    function closeStudio() { if (player) { player.stopVideo(); } document.getElementById('studioOverlay').style.display = 'none'; }
-
-    function syncCurrentTime() {
-        if (player && typeof player.getCurrentTime === 'function') {
-            const rawTime = player.getCurrentTime();
-            const minutes = Math.floor(rawTime / 60);
-            const seconds = Math.floor(rawTime % 60);
-            const ms = Math.floor((rawTime % 1) * 100);
-            document.getElementById('timelineTime').value = `${minutes}:${seconds.toString().padStart(2, '0')}.${ms}`;
-        }
-    }
-
-    function addTimelineItem() {
-        const timeVal = document.getElementById('timelineTime').value.trim();
-        const descVal = document.getElementById('timelineDesc').value.trim();
-        if (!timeVal || !descVal) { alert('시간 정보와 안무 동선 설명을 입력해 주세요.'); return; }
-
-        const canvasData = canvas.toDataURL(); 
-        const item = { time: timeVal, desc: descVal, canvas: canvasData, positions: JSON.parse(JSON.stringify(dancers)) };
-
-        let currentData = JSON.parse(localStorage.getItem(currentVideoId)) || { timelines: [] };
-        currentData.timelines.push(item);
-        currentData.timelines.sort((a,b) => parseFloat(a.time.replace(':', '.')) - parseFloat(b.time.replace(':', '.')));
-        
-        localStorage.setItem(currentVideoId, JSON.stringify(currentData));
-        document.getElementById('timelineTime').value = '';
-        document.getElementById('timelineDesc').value = '';
-        renderTimelines(currentData.timelines);
-    }
-
-    function deleteTimelineItem(index) {
-        let currentData = JSON.parse(localStorage.getItem(currentVideoId));
-        if (currentData && currentData.timelines) {
-            currentData.timelines.splice(index, 1);
-            localStorage.setItem(currentVideoId, JSON.stringify(currentData));
-            renderTimelines(currentData.timelines);
-        }
-    }
-
-    function seekToTimeline(timeStr, savedPositions) {
-        if (player) {
-            const parts = timeStr.split(':');
-            const secParts = parts[1].split('.');
-            const totalSeconds = parseInt(parts[0]) * 60 + parseInt(secParts[0]) + (parseFloat('0.' + secParts[1]) || 0);
-            player.seekTo(totalSeconds, true);
-        }
-        if (savedPositions) {
-            dancers = JSON.parse(JSON.stringify(savedPositions));
-            drawStage();
-        }
-    }
-
-    function loadStudioData(videoId) {
-        const saved = localStorage.getItem(videoId);
-        if (saved) {
-            const data = JSON.parse(saved);
-            if (data.timelines) renderTimelines(data.timelines);
-        } else {
-            document.getElementById('reportGrid').innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted); grid-column: 1/-1;">등록된 타임라인 동선표가 여기에 빌드됩니다.</div>';
-            document.getElementById('timelineList').innerHTML = '';
-        }
-    }
-
-    function renderTimelines(list) {
-        const timelineListDiv = document.getElementById('timelineList');
-        const reportGrid = document.getElementById('reportGrid');
-        
-        timelineListDiv.innerHTML = '';
-        reportGrid.innerHTML = '';
-
-        if(!list || list.length === 0) {
-            reportGrid.innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted); grid-column: 1/-1;">등록된 타임라인 동선표가 여기에 빌드됩니다.</div>';
-            return;
-        }
-
-        list.forEach((item, index) => {
-            const posString = JSON.stringify(item.positions);
-            
-            timelineListDiv.innerHTML += `
-                <div class="timeline-item" onclick='seekToTimeline("${item.time}", ${posString})'>
-                    <div class="item-info">
-                        <span class="item-time">⏱️ ${item.time}</span>
-                        <span class="item-desc">${item.desc}</span>
-                    </div>
-                    <button class="btn btn-danger" onclick="event.stopPropagation(); deleteTimelineItem(${index});">삭제</button>
-                </div>`;
-            
-            reportGrid.innerHTML += `
-                <div class="report-card" onclick='seekToTimeline("${item.time}", ${posString})' title="클릭하면 이 대형 상태로 마커가 복원됩니다.">
-                    <img src="${item.canvas}">
-                    <div class="report-card-time">${item.time}</div>
-                    <span class="report-card-desc">${item.desc}</span>
-                </div>`;
-        });
-    }
-</script>
-</body>
-</html>
+                playerVars:
