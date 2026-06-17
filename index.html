@@ -3,107 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dance Choreography & Formation Studio (Integrated)</title>
+    <title>Dance Formation Studio</title>
     <style>
-        :root { --bg-color: #121212; --card-bg: #1e1e1e; --text-color: #ffffff; --accent-color: #ff4757; --border-color: #333; --studio-bg: #1a1a1a; }
-        body { background-color: var(--bg-color); color: var(--text-color); font-family: sans-serif; margin: 0; padding: 15px; }
-        .container { max-width: 1400px; margin: 0 auto; }
-        .search-section { background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 25px; }
-        .search-box { display: flex; gap: 8px; margin-bottom: 15px; }
-        input { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: #2d2d2d; color: white; }
-        .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; }
-        .btn-search { background: var(--accent-color); color: white; }
-        .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .video-card { background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border-color); cursor: pointer; overflow: hidden; }
-        .studio-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; }
-        .studio-window { background: var(--studio-bg); width: 100%; max-width: 1300px; height: 95vh; display: flex; flex-direction: column; border-radius: 12px; }
-        .studio-body { display: flex; flex: 1; overflow: hidden; }
-        .player-sidebar { flex: 1.2; background: #000; display: flex; justify-content: center; align-items: center; }
-        .analysis-sidebar { flex: 1; padding: 15px; overflow-y: auto; background: #1e1e1e; }
-        .ai-analysis-box { background: #2f3542; border-left: 5px solid #2ed573; padding: 12px; border-radius: 6px; font-size: 0.9rem; }
-        .ai-tag { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; background: #1e1e1e; color: #2ed573; margin-right: 5px; }
-        canvas { width: 100%; max-width: 400px; aspect-ratio: 4/3; background: #181818; display: block; margin: auto; }
-        .timeline-item { background: #2a2a2a; padding: 10px; margin: 5px 0; border-radius: 6px; display: flex; justify-content: space-between; cursor: pointer; }
+        :root { --bg: #121212; --card: #1e1e1e; --accent: #ff4757; }
+        body { background: var(--bg); color: #fff; font-family: sans-serif; margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: auto; }
+        .search-area { background: var(--card); padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+        .card { background: var(--card); border-radius: 8px; cursor: pointer; padding: 10px; border: 1px solid #333; }
+        .studio-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: #000; z-index: 1000; }
+        canvas { background: #111; border: 1px solid #444; width: 100%; max-width: 400px; display: block; margin: 10px auto; }
+        .btn { padding: 8px 16px; cursor: pointer; border: none; border-radius: 4px; background: var(--accent); color: white; }
     </style>
     <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
 <div class="container">
-    <h1>Dance & Formation Studio</h1>
-    <div class="search-section">
-        <div class="search-box">
-            <input type="text" id="genreInput" placeholder="장르나 곡명 입력">
-            <select id="videoType" style="background:#2d2d2d; color:white; border-radius:8px; padding:0 10px;">
-                <option value="normal">일반 동영상</option>
-                <option value="shorts">Shorts (1분 내외)</option>
-            </select>
-            <button class="btn btn-search" onclick="initialSearch()">검색</button>
-        </div>
+    <h1>Dance Studio</h1>
+    <div class="search-area">
+        <input type="text" id="q" placeholder="곡명 입력">
+        <select id="type">
+            <option value="normal">일반 (1분 이상)</option>
+            <option value="shorts">Shorts (1분 내외)</option>
+        </select>
+        <button class="btn" onclick="search()">검색</button>
     </div>
-    <div class="video-grid" id="videoGrid"></div>
+    <div class="grid" id="results"></div>
 </div>
 
-<div class="studio-overlay" id="studioOverlay">
-    <div class="studio-window">
-        <div style="padding:15px; border-bottom:1px solid #333; display:flex; justify-content:space-between;">
-            <div id="studioTitle">분석 스튜디오</div>
-            <button onclick="closeStudio()" style="background:none; border:none; color:white; font-size:20px; cursor:pointer;">×</button>
-        </div>
-        <div class="studio-body">
-            <div class="player-sidebar"><div id="ytPlayer" style="width:100%; height:100%;"></div></div>
-            <div class="analysis-sidebar">
-                <div class="section-title">🤖 안무 난이도 진단</div>
-                <div class="ai-analysis-box" id="aiAnalysisBox">분석 중...</div>
-                <div style="margin-top:20px;">
-                    <canvas id="formationCanvas" width="400" height="300"></canvas>
-                    <div style="text-align:center; margin-top:10px;">
-                        <button onclick="adjustDancerCount(-1)">➖ 감소</button>
-                        <span id="dancerCountDisplay" style="margin:0 10px;">11명</span>
-                        <button onclick="adjustDancerCount(1)">➕ 추가</button>
-                    </div>
-                </div>
-                <div id="timelineList" style="margin-top:20px;"></div>
-            </div>
+<div class="studio-overlay" id="studio">
+    <div style="display:flex; height:100%;">
+        <div style="flex:1" id="yt-player"></div>
+        <div style="flex:1; padding:20px; overflow-y:auto;">
+            <button onclick="document.getElementById('studio').style.display='none'">닫기</button>
+            <div id="ai-info" style="margin:20px 0; padding:15px; border-left:4px solid var(--accent); background:#222;"></div>
+            <canvas id="canvas" width="400" height="300"></canvas>
         </div>
     </div>
 </div>
 
 <script>
-    const API_KEY = 'AIzaSyDjb6EuJcqPFbhwyIShQHDl1cwF32zd69U';
-    let player, dancers = [], currentMaxDancers = 11, canvas, ctx;
+    const API_KEY = 'AIzaSyDjb6EuJcqPFbhwyIShQHDl1cwF32zd69U'; // 키를 입력하세요
 
-    function initialSearch() {
-        const query = document.getElementById('genreInput').value;
-        const type = document.getElementById('videoType').value;
-        const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query + ' choreography')}&type=video&maxResults=20&videoDuration=${type === 'shorts' ? 'short' : 'medium'}&key=${API_KEY}`;
+    async function search() {
+        const q = document.getElementById('q').value;
+        const type = document.getElementById('type').value;
+        const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(q + ' choreography')}&type=video&maxResults=20&videoDuration=${type === 'shorts' ? 'short' : 'medium'}&key=${API_KEY}`;
         
-        fetch(url).then(res => res.json()).then(data => {
-            const grid = document.getElementById('videoGrid');
-            grid.innerHTML = '';
-            data.items.forEach(item => {
-                if((type === 'shorts') === (item.snippet.title + item.snippet.description).toLowerCase().includes('shorts')) {
-                    grid.innerHTML += `<div class="video-card" onclick="openStudio('${item.id.videoId}', '${item.snippet.title}')"><img src="${item.snippet.thumbnails.medium.url}" style="width:100%"><div style="padding:10px;">${item.snippet.title}</div></div>`;
-                }
-            });
+        const res = await fetch(url);
+        const data = await res.json();
+        const grid = document.getElementById('results');
+        grid.innerHTML = '';
+        
+        data.items.forEach(item => {
+            const title = item.snippet.title.toLowerCase();
+            const isShorts = title.includes('shorts');
+            if ((type === 'shorts' && isShorts) || (type === 'normal' && !isShorts)) {
+                grid.innerHTML += `
+                    <div class="card" onclick="openStudio('${item.id.videoId}', '${item.snippet.title}')">
+                        <img src="${item.snippet.thumbnails.medium.url}" style="width:100%">
+                        <p>${item.snippet.title}</p>
+                    </div>`;
+            }
         });
     }
 
     function openStudio(id, title) {
-        document.getElementById('studioOverlay').style.display = 'flex';
-        document.getElementById('studioTitle').innerText = title;
-        player = new YT.Player('ytPlayer', { videoId: id, events: { onReady: e => e.target.playVideo() } });
+        document.getElementById('studio').style.display = 'block';
+        new YT.Player('yt-player', { videoId: id });
         
-        // 난이도 판정 로직 (상급 추가 완료)
-        const fullText = (title + " " + id).toLowerCase();
-        let diff = "중급 (Normal)", commentary = "기본 대형 위주의 안무입니다.";
-        if (fullText.includes("easy") || fullText.includes("beginner")) { diff = "초급 (Easy)"; commentary = "기초 동작 위주로 구성되어 동선이 간결합니다."; }
-        else if (fullText.includes("hard") || fullText.includes("expert") || fullText.includes("advanced") || fullText.includes("insane")) { diff = "상급 (Expert)"; commentary = "동선 이동이 빠르고 복잡합니다. 정밀한 그리드 조율이 필수적입니다."; }
+        // 난이도 판정
+        const fullText = (title).toLowerCase();
+        let diff = "중급", msg = "표준 안무입니다.";
+        if (fullText.includes("easy") || fullText.includes("beginner")) { diff = "초급"; msg = "초보자용 기초 안무입니다."; }
+        else if (fullText.includes("hard") || fullText.includes("expert") || fullText.includes("advanced") || fullText.includes("insane")) { diff = "상급"; msg = "고난도 안무입니다. 정밀한 대형 이동이 필요합니다."; }
         
-        document.getElementById('aiAnalysisBox').innerHTML = `<div><span class="ai-tag">난이도</span><b>${diff}</b></div><p style="font-size:0.8rem; margin-top:5px;">💡 ${commentary}</p>`;
+        document.getElementById('ai-info').innerHTML = `<b>난이도: ${diff}</b><br>${msg}`;
     }
-
-    function closeStudio() { document.getElementById('studioOverlay').style.display = 'none'; player.destroy(); }
-    function adjustDancerCount(val) { currentMaxDancers = Math.max(1, currentMaxDancers + val); document.getElementById('dancerCountDisplay').innerText = currentMaxDancers + "명"; }
 </script>
 </body>
 </html>
