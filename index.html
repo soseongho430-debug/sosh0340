@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dance Choreography & Formation Studio</title>
     <style>
         :root { 
@@ -27,6 +27,7 @@
         .btn-refresh { background-color: #2f3542; color: white; display: none; }
         .btn-action { background-color: #3742fa; color: white; margin-top: 5px; width: 100%; }
         .btn-danger { background-color: #ff4757; color: white; padding: 5px 10px; font-size: 0.8rem; }
+        .btn-success { background-color: #2ed573; color: white; }
         
         .filters { display: flex; flex-wrap: wrap; gap: 15px; padding-top: 15px; border-top: 1px solid var(--border-color); }
         .filter-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 120px; }
@@ -44,11 +45,11 @@
         .video-meta { font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between; }
         .status-message { text-align: center; font-size: 1.1rem; color: var(--text-muted); margin-top: 40px; width: 100%; }
 
-        /* 분석 스튜디오 모달 팝업 */
-        .studio-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; padding: 10px; }
-        .studio-window { background-color: var(--studio-bg); border-radius: 12px; border: 1px solid var(--border-color); width: 100%; max-width: 1300px; height: 95vh; display: flex; flex-direction: column; overflow: hidden; }
+        /* ── 분석 스튜디오 모달 팝업 ── */
+        .studio-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; padding: 10px; box-sizing: border-box; }
+        .studio-window { background-color: var(--studio-bg); border-radius: 12px; border: 1px solid var(--border-color); width: 100%; max-width: 1300px; height: 95vh; display: flex; flex-direction: column; overflow: hidden; position: relative; }
         .studio-header { padding: 12px 20px; background-color: #222; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
-        .studio-title { font-size: 1.05rem; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 85%; }
+        .studio-title { font-size: 1.05rem; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%; }
         .close-btn { background: none; border: none; color: white; font-size: 2rem; cursor: pointer; line-height: 1; }
         
         .studio-body { display: flex; flex-direction: row; flex: 1; overflow: hidden; }
@@ -62,11 +63,15 @@
         .analysis-sidebar { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background-color: #1e1e1e; }
         .section-title { font-size: 1rem; color: var(--accent-color); font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #444; padding-bottom: 5px; }
         
-        /* AI 분석창 */
+        /* 시스템 자동 분석 결과창 스타일 */
         .ai-analysis-box { background: #2f3542; border-left: 5px solid #2ed573; padding: 12px; border-radius: 6px; font-size: 0.9rem; line-height: 1.5; }
         .ai-tag { display: inline-block; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 0.75rem; margin-right: 5px; background: #1e1e1e; color: #2ed573; }
 
-        /* 동선 캔버스 */
+        .meta-selectors { display: flex; gap: 10px; background: #2a2a2a; padding: 10px; border-radius: 8px; }
+        .select-box { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+        .select-box select { padding: 8px; background: #121212; color: white; border: 1px solid #444; border-radius: 4px; font-size: 0.85rem; }
+
+        /* 동선 캔버스 그리기 */
         .canvas-section { display: flex; flex-direction: column; gap: 6px; }
         .canvas-container { position: relative; background: #2d3436; border: 2px dashed #555; border-radius: 8px; width: 100%; max-width: 360px; margin: 0 auto; aspect-ratio: 4/3; }
         canvas { width: 100%; height: 100%; display: block; cursor: crosshair; touch-action: none; }
@@ -81,14 +86,13 @@
         .item-time { font-weight: bold; color: #ff4757; font-size: 0.85rem; }
         .item-desc { font-size: 0.85rem; color: #fff; }
 
-        /* 📋 동선표 최종 요약 리포트 영역 */
+        /* ── 동선표 최종 요약 리포트 영역 ── */
         .report-section { background-color: #252525; padding: 15px; border-radius: 8px; border: 1px solid #444; margin-top: 10px; }
         .report-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-top: 10px; }
-        .report-card { background: #1a1a1a; padding: 8px; border-radius: 6px; text-align: center; border: 1px solid #333; transition: transform 0.2s; }
-        .report-card:hover { transform: scale(1.03); border-color: #2ed573; }
-        .report-card img { width: 100%; border-radius: 4px; background: #2d3436; aspect-ratio: 4/3; object-fit: contain; display: block; }
+        .report-card { background: #1a1a1a; padding: 8px; border-radius: 6px; text-align: center; border: 1px solid #333; }
+        .report-card img { width: 100%; border-radius: 4px; background: #2d3436; aspect-ratio: 4/3; object-fit: contain; }
         .report-card-time { font-size: 0.8rem; color: var(--accent-color); font-weight: bold; margin-top: 5px; }
-        .report-card-desc { font-size: 0.75rem; color: #ddd; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px; }
+        .report-card-desc { font-size: 0.75rem; color: #ddd; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
         @media (max-width: 768px) {
             .studio-body { flex-direction: column; overflow-y: auto; }
@@ -168,6 +172,11 @@
                     </div>
                 </div>
 
+                <div style="display:none;">
+                    <select id="danceDifficulty" onchange="saveStudioData()"><option value="미지정"></option></select>
+                    <select id="danceSpeed" onchange="saveStudioData()"><option value="미지정"></option></select>
+                </div>
+
                 <div class="canvas-section">
                     <div class="section-title">📐 무대 대형 / 동선 스케치 패드</div>
                     <div class="canvas-container">
@@ -207,12 +216,11 @@
 </div>
 
 <script>
-    const API_KEY = 'AIzaSyDjb6EuJcqPFbhwyIShQHDl1cwF32zd69U'; 
+    const API_KEY = 'YOUR_YOUTUBE_API_KEY_HERE'; 
 
     let nextPageToken = ''; 
     let player = null; 
     let currentVideoId = '';
-    let globalVideoDetails = {}; // 전역 저장소 추가 (분석엔진 누락 방지)
     
     let canvas, ctx;
     let isDrawing = false;
@@ -249,7 +257,7 @@
         const refreshBtn = document.getElementById('refreshBtn');
 
         if (!genreInput) { alert('검색어를 입력해 주세요!'); return; }
-        if (!API_KEY || API_KEY.trim() === '' || API_KEY === 'YOUR_YOUTUBE_API_KEY_HERE') {
+        if (!API_KEY || API_KEY.trim() === '' || API_KEY === 'AIzaSyDjb6EuJcqPFbhwyIShQHDl1cwF32zd69U') {
             alert('유튜브 API_KEY를 소스 코드 내에 정확히 입력하셔야 연동됩니다.');
             return;
         }
@@ -291,18 +299,17 @@
                 return; 
             }
 
-            // ⚠️ 핵심 교정: 가상 분석 엔진을 돌리기 위해 비디오 상세 API(snippet 포함)를 명확히 다시 호출합니다.
             const videoIds = videos.map(item => item.id.videoId).join(',');
-            const statsUrl = `https://www.googleapis.com/youtube/v3/videos?part=statistics,contentDetails,snippet&id=${videoIds}&key=${API_KEY}`;
+            const statsUrl = `https://www.googleapis.com/youtube/v3/videos?part=statistics,contentDetails&id=${videoIds}&key=${API_KEY}`;
             const statsResponse = await fetch(statsUrl);
             const statsData = await statsResponse.json();
             
+            const videoDetailsMap = {};
             statsData.items.forEach(item => {
-                globalVideoDetails[item.id] = { 
+                videoDetailsMap[item.id] = { 
                     viewCount: parseInt(item.statistics.viewCount || 0), 
                     duration: item.contentDetails.duration,
-                    title: item.snippet.title,
-                    description: item.snippet.description || '' // 정확하게 텍스트 데이터를 확보
+                    description: item.snippet.description // [추가] 텍스트 분석용 설명글 파싱
                 };
             });
 
@@ -311,15 +318,15 @@
 
             videos.forEach(video => {
                 const videoId = video.id.videoId;
-                const detail = globalVideoDetails[videoId];
-                const title = (detail ? detail.title : video.snippet.title).replace(/"/g, '&quot;');
+                const title = video.snippet.title.replace(/"/g, '&quot;');
                 const channelTitle = video.snippet.channelTitle;
                 const thumbnail = video.snippet.thumbnails.medium.url;
                 const publishedAt = new Date(video.snippet.publishedAt).toLocaleDateString();
+                const detail = videoDetailsMap[videoId];
                 const viewCountString = detail ? detail.viewCount.toLocaleString() : '0';
 
                 videoGrid.innerHTML += `
-                    <div class="video-card" onclick="openStudio('${videoId}', '${title}')">
+                    <div class="video-card" onclick="openStudio('${videoId}', '${title}', '${encodeURIComponent(detail?.description || '')}')">
                         <div class="thumbnail-container"><img src="${thumbnail}"></div>
                         <div class="video-info">
                             <div class="video-title">${video.snippet.title}</div>
@@ -333,49 +340,44 @@
         }
     }
 
-    /* 🤖 수정된 가상 안무 정밀 진단 분석 엔진 */
-    function analyzeDanceChoreography(videoId, title) {
-        const detail = globalVideoDetails[videoId];
-        const descriptionText = detail ? detail.description : '';
-        
-        // 검색 텍스트 통합 파싱
-        const fullText = (title + " " + descriptionText).toLowerCase();
-        
+    /* 🔥 [핵심 추가] 영상 메타데이터 분석 기반 자동 안무 해설 엔진 */
+    function analyzeDanceChoreography(title, rawDesc) {
+        const fullText = (title + " " + decodeURIComponent(rawDesc)).toLowerCase();
         let difficulty = "중급 (Normal)";
         let speed = "보통 속도 (Moderate)";
         let commentary = "이 영상은 대중적인 구성의 안무 스타일입니다. 기본 바운스와 대형 전환 위주의 동선표 설계를 추천합니다.";
 
-        // 1. 난이도 판단 규칙 정밀화
-        if (fullText.includes("easy") || fullText.includes("초급") || fullText.includes("beginner") || fullText.includes("쉽게") || fullText.includes("기초") || fullText.includes("tutorial")) {
+        // 난이도 판단 규칙
+        if (fullText.includes("easy") || fullText.includes("초급") || fullText.includes("beginner") || fullText.includes("튜토리얼")) {
             difficulty = "초급 (Easy)";
             commentary = "비교적 동작이 직관적이고 반복적인 루틴이 많아 동선 이동 폭이 간결한 편입니다. 대형 중심점 고정 설계를 권장합니다.";
-        } else if (fullText.includes("hard") || fullText.includes("expert") || fullText.includes("전문가") || fullText.includes("상급") || fullText.includes("안무가") || fullText.includes("1million") || fullText.includes("dance studio")) {
+        } else if (fullText.includes("hard") || fullText.includes("expert") || fullText.includes("전문가") || fullText.includes("상급") || fullText.includes("1밀리언") || fullText.includes("1million")) {
             difficulty = "상급 ~ 전문가 (Challenging)";
-            commentary = "아이솔레이션과 복합 풋워크가 융합된 고난도 전문 안무입니다. 파트별 개인 동선 꼬임 현상이 일어날 수 있으니 디테일한 스케치가 필요합니다.";
+            commentary = "아이솔레이션과 고난도 풋워크가 융합된 복합 안무입니다. 파트별 개인 동선 꼬임 현상이 일어날 수 있으니 디테일한 스케치가 필요합니다.";
         }
 
-        // 2. 속도 및 비트감 판단 규칙
-        if (fullText.includes("fast") || fullText.includes("빠른") || fullText.includes("speed up") || fullText.includes("challenge") || fullText.includes("챌린지")) {
+        // 속도 판단 규칙
+        if (fullText.includes("fast") || fullText.includes("빠른") || fullText.includes("speed up") || fullText.includes("챌린지")) {
             speed = "빠름 (Fast / Rush)";
-            if(difficulty.includes("상급")) {
-                commentary += " 또한 박자가 매우 조밀하게 쪼개져 있어 빠른 대형 전환 스케치 맵핑이 핵심입니다.";
-            } else {
-                commentary = "경쾌하고 빠른 템포의 곡입니다. 속도감이 있는 만큼 대형 전환 시 이동 거리를 최소화하는 동선표가 유리합니다.";
-            }
-        } else if (fullText.includes("slow") || fullText.includes("느린") || fullText.includes("groove") || fullText.includes("r&b") || fullText.includes("ballad")) {
+            if(difficulty.includes("상급")) commentary += " 또한 박자가 매우 쪼개져 있어 빠른 대형 전환 스케치 맵핑이 핵심입니다.";
+        } else if (fullText.includes("slow") || fullText.includes("느린") || fullText.includes("발라드") || fullText.includes("r&b")) {
             speed = "느림 (Slow / Groove)";
-            commentary = "그루브와 신체 선을 강조하는 정적인 무브 위주입니다. 동선의 흐름이 끊기지 않는 부드러운 대형 전환 구조가 이상적입니다.";
+            commentary = "그루브와 선을 강조하는 정적인 무브 위주입니다. 동선의 흐름이 끊기지 않는 부드러운 대형 전환 구조가 이상적입니다.";
         }
 
-        // 3. 브라우저 UI 화면에 실시간 피드백 반영
+        // 결과 출력 포맷팅
         document.getElementById('aiAnalysisBox').innerHTML = `
             <div><span class="ai-tag">추정 난이도</span> <b>${difficulty}</b></div>
             <div style="margin: 4px 0;"><span class="ai-tag">체감 비트감</span> <b>${speed}</b></div>
-            <div style="margin-top:8px; font-size:0.85rem; color:#ddd; border-top:1px dashed #555; padding-top:6px;">💡 <b>스튜디오 가이드:</b> ${commentary}</div>
+            <div style="margin-top:8px; font-size:0.85rem; color:#ddd; border-top:1px dashed #555; padding-top:6px;">💡 <b>스튜디오 진단 가이드:</b> ${commentary}</div>
         `;
+
+        // 가상 셀렉터 세팅값 동기화
+        document.getElementById('danceDifficulty').value = difficulty;
+        document.getElementById('danceSpeed').value = speed;
     }
 
-    function openStudio(videoId, videoTitle) {
+    function openStudio(videoId, videoTitle, encodedDesc) {
         currentVideoId = videoId;
         document.getElementById('studioTitle').innerText = `🎬 안무 스튜디오 분석 모드: ${videoTitle}`;
         document.getElementById('studioOverlay').style.display = 'flex';
@@ -389,8 +391,8 @@
             player.loadVideoById(videoId);
         }
 
-        // 데이터 파싱 분석 엔진 가동 및 로컬스토리지 복원
-        analyzeDanceChoreography(videoId, videoTitle);
+        // 텍스트 분석 가동
+        analyzeDanceChoreography(videoTitle, encodedDesc);
         loadStudioData(videoId);
         clearCanvas();
     }
@@ -412,13 +414,16 @@
         const descVal = document.getElementById('timelineDesc').value.trim();
         if (!timeVal || !descVal) { alert('시간 정보와 안무 동선 설명을 입력해 주세요.'); return; }
 
-        const canvasData = canvas.toDataURL(); // 스케치판 그림 캡처(데이터 추출)
+        const canvasData = canvas.toDataURL(); // 스케치판 그림 캡처
         const item = { time: timeVal, desc: descVal, canvas: canvasData };
 
-        let currentData = JSON.parse(localStorage.getItem(currentVideoId)) || { timelines: [] };
-        currentData.timelines.push(item);
+        let currentData = JSON.parse(localStorage.getItem(currentVideoId)) || { difficulty: '미지정', speed: '미지정', timelines: [] };
         
-        // 시간 정렬
+        // 자동분석 결과 유지 보완
+        currentData.difficulty = document.getElementById('danceDifficulty').value;
+        currentData.speed = document.getElementById('danceSpeed').value;
+        
+        currentData.timelines.push(item);
         currentData.timelines.sort((a,b) => parseFloat(a.time.replace(':', '.')) - parseFloat(b.time.replace(':', '.')));
         
         localStorage.setItem(currentVideoId, JSON.stringify(currentData));
@@ -462,7 +467,7 @@
         }
     }
 
-    /* 📋 동선표 최종 요약 리포트 실시간 자동 빌드 함수 */
+    /* 🔥 [핵심 추가] 타임라인 렌더링 시 동시에 요약 리포트 그리드까지 함께 자동 빌드 */
     function renderTimelines(list) {
         const timelineListDiv = document.getElementById('timelineList');
         const reportGrid = document.getElementById('reportGrid');
@@ -470,13 +475,13 @@
         timelineListDiv.innerHTML = '';
         reportGrid.innerHTML = '';
 
-        if(!list || list.length === 0) {
+        if(list.length === 0) {
             reportGrid.innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted); grid-column: 1/-1;">등록된 타임라인 동선표가 여기에 빌드됩니다.</div>';
             return;
         }
 
         list.forEach((item, index) => {
-            // 1. 우측 중간 타임라인 제어선 생성
+            // 1. 중간 타임라인 리스트 생성
             timelineListDiv.innerHTML += `
                 <div class="timeline-item" onclick="seekToTimeline('${item.time}', '${item.canvas || ''}')">
                     <div class="item-info">
@@ -486,12 +491,12 @@
                     <button class="btn btn-danger" onclick="event.stopPropagation(); deleteTimelineItem(${index});">삭제</button>
                 </div>`;
             
-            // 2. 우측 최하단 인쇄/저장용 요약 리포트 카드 자동 생성 (그림 복원 썸네일 탑재)
+            // 2. 하단 리포트 요약 카드 동시 생성 (대형 썸네일 포함)
             reportGrid.innerHTML += `
-                <div class="report-card" onclick="seekToTimeline('${item.time}', '${item.canvas || ''}')" title="클릭하면 이 파트 동선으로 복원됩니다.">
+                <div class="report-card" onclick="seekToTimeline('${item.time}', '${item.canvas || ''}')" style="cursor:pointer;">
                     <img src="${item.canvas || 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'}">
                     <div class="report-card-time">${item.time}</div>
-                    <span class="report-card-desc">${item.desc}</span>
+                    <span class="report-card-desc" title="${item.desc}">${item.desc}</span>
                 </div>`;
         });
     }
